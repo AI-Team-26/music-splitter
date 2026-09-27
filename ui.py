@@ -46,14 +46,6 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     title_label = ttk.Label(main_frame, text="Music Splitter", font=("Arial", 16, "bold"))
     title_label.pack(anchor=tk.W, pady=(0, pad))
 
-    # Top message bar: fixed height so controls never move when a message appears
-    message_bar = ttk.Frame(main_frame, height=28)
-    message_bar.pack(fill=tk.X, pady=(0, pad))
-    message_bar.pack_propagate(False)
-    message_var = tk.StringVar(value="")
-    message_label = ttk.Label(message_bar, textvariable=message_var, anchor=tk.W)
-    message_label.pack(side=tk.LEFT, fill=tk.X)
-
     # Browse row: button + selected file name
     browse_frame = ttk.Frame(main_frame)
     browse_frame.pack(fill=tk.X, pady=(0, pad))
@@ -98,6 +90,14 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     )
     split_button.pack(fill=tk.X, pady=(pad, 0))
 
+    # Status area: fixed height directly below the Split button
+    status_bar = ttk.Frame(main_frame, height=28)
+    status_bar.pack(fill=tk.X, pady=(pad_xs, 0))
+    status_bar.pack_propagate(False)
+    status_var = tk.StringVar(value="")
+    status_label = ttk.Label(status_bar, textvariable=status_var, anchor=tk.W)
+    status_label.pack(side=tk.LEFT, fill=tk.X)
+
     # Log viewer button: hidden until an operation fails
     def show_log_viewer():
         win = tk.Toplevel(root)
@@ -133,9 +133,14 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
             file_var.set("No file selected")
             file_label.config(foreground="gray")
 
-    def set_message(msg, is_error=False):
-        message_var.set(msg)
-        message_label.config(foreground="red" if is_error else "")
+    def set_message(msg, is_error=False, is_success=False):
+        status_var.set(msg)
+        if is_error:
+            status_label.config(foreground="red")
+        elif is_success:
+            status_label.config(foreground="green")
+        else:
+            status_label.config(foreground="")
 
     def set_enabled(enabled):
         state = tk.NORMAL if enabled else tk.DISABLED

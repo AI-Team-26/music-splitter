@@ -155,7 +155,7 @@ class MusicSplitterApp:
             self.set_message(error, is_error=True)
             self.set_log_button_visible(True)
         else:
-            self.set_message(f"Done: {count} parts created")
+            self.set_message(f"✓ Done — {count} parts created", is_success=True)
         self.set_enabled(True)
 
     def close_app(self):
