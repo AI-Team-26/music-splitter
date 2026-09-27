@@ -21,6 +21,19 @@
       }
     },
     {
+      "label": "📦 Build Windows Installer",
+      "type": "shell",
+      "command": "if [ ! -x .venv/Scripts/python.exe ]; then echo 'ERROR: run \"Setup Project\" first'; exit 1; fi; if [ ! -f innosetup/ISCC.exe ]; then echo 'ERROR: extract Inno Setup into ./innosetup first (https://jrsoftware.org/isdl.php)'; exit 1; fi; .venv/Scripts/python.exe -m PyInstaller music_splitter.spec && ./innosetup/ISCC.exe /Q installer/music_splitter.iss",
+      "args": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
       "label": "🧪 Run Tests",
       "type": "shell",
       "command": "if [ -x .venv/bin/python ]; then PY=.venv/bin/python; elif [ -x .venv/Scripts/python.exe ]; then PY=.venv/Scripts/python.exe; else echo 'ERROR: virtualenv not found. Run the \"Setup Project\" task first.'; exit 1; fi; exec \"$PY\" -m unittest discover tests",

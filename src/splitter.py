@@ -3,6 +3,7 @@ import os
 import math
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 import yaml
 from mutagen.mp3 import MP3
@@ -20,7 +21,18 @@ def get_logger(name=LOGGER_NAME):
 
 logger = get_logger()
 
-UI_TEXT_FILE = Path(__file__).resolve().parent.parent / "localization" / "english.yml"
+def resource_path(relative: str) -> Path:
+    """Resolve a repository-relative resource path.
+
+    When frozen by PyInstaller, resources live next to the executable inside
+    the temporary extraction directory (sys._MEIPASS); otherwise relative to
+    the repository root (two levels above this file).
+    """
+    base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent))
+    return base / relative
+
+
+UI_TEXT_FILE = resource_path("localization/english.yml")
 # Built-in fallback used when localization/english.yml is missing, unparseable or incomplete.
 DEFAULT_PROVENANCE = {
     "lang": "eng",
@@ -75,10 +87,18 @@ class MP3Splitter:
 
     @staticmethod
     def _find_ffmpeg() -> str:
+        """Locate ffmpeg on the system PATH.
+
+        This build does not bundle FFmpeg: users must have it installed and
+        reachable via PATH. Raises a user-friendly error with install guidance
+        when missing.
+        """
         path = shutil.which("ffmpeg")
         if not path:
             raise RuntimeError(
-                "FFmpeg was not found on PATH. Install FFmpeg and ensure 'ffmpeg' is accessible."
+                "FFmpeg was not found on your system PATH. "
+                "Install FFmpeg from https://www.gyan.dev/ffmpeg/builds/ "
+                "and add its 'bin' folder to PATH, then restart the app."
             )
         return path
 

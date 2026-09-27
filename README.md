@@ -68,6 +68,32 @@ Or run directly without activating:
 
 If running the app fails with `exit code: 127` (or "virtualenv not found"), the virtual environment doesn't exist yet. Run the **"🏗️ Setup Project"** task first, then run the app again.
 
+## Building the Windows Installer
+
+The Windows build is a two-step pipeline: **PyInstaller** packages the app into an onedir bundle, and **Inno Setup** turns that bundle into a classic setup executable (Start Menu shortcut, desktop icon option, uninstaller).
+
+> This build does **not** bundle FFmpeg: the installed app requires FFmpeg on the system PATH (see [Prerequisites](#prerequisites)). A clear error with install instructions is shown if it is missing.
+
+### Requirements (Windows)
+
+- Python 3.12+ with the project venv set up (see above) plus PyInstaller:
+  ```powershell
+  .venv\Scripts\python.exe -m pip install pyinstaller
+  ```
+- [Inno Setup 6.x](https://jrsoftware.org/isinfo.php) — extract it somewhere (e.g. `.\innosetup`) so `ISCC.exe` is available.
+
+### Build steps
+
+```powershell
+# 1. Package the app (output in dist/MusicSplitter/)
+.venv\Scripts\python.exe -m PyInstaller music_splitter.spec
+
+# 2. Compile the installer (output in installer/output/)
+.\innosetup\ISCC.exe /Q installer\music_splitter.iss
+```
+
+Or run the VS Code task **"📦 Build Windows Installer"**. The resulting `MusicSplitter-Setup-*.exe` can be shared directly; CI also builds it automatically via the *Build Windows Installer* workflow (`.github/workflows/build-installer.yml`).
+
 ## CUE file
 
 .cue file example:

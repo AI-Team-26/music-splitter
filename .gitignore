@@ -4,3 +4,7 @@ __pycache__/
 # application files
 settings.txt
 music_splitter.log
+# local build output
+agent_build/
+dist/
+build/
