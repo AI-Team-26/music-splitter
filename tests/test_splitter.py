@@ -4,7 +4,7 @@ import shutil
 import tempfile
 from pathlib import Path
 import yaml as _yaml
-from libs.splitter import (
+from src.splitter import (
     MP3Splitter,
     DEFAULT_PROVENANCE,
     UI_TEXT_FILE,

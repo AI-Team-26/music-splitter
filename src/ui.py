@@ -2,7 +2,7 @@ import os
 import tkinter as tk
 from tkinter import ttk
 
-from libs.splitter import LOG_FILE
+from src.splitter import LOG_FILE
 
 pad = 10 # common padding for UI
 pad_xs = 5 

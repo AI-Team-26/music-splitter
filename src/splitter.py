@@ -20,8 +20,8 @@ def get_logger(name=LOGGER_NAME):
 
 logger = get_logger()
 
-UI_TEXT_FILE = Path(__file__).resolve().parent.parent / "ui-text" / "english.yml"
-# Built-in fallback used when ui-text/english.yml is missing, unparseable or incomplete.
+UI_TEXT_FILE = Path(__file__).resolve().parent.parent / "localization" / "english.yml"
+# Built-in fallback used when localization/english.yml is missing, unparseable or incomplete.
 DEFAULT_PROVENANCE = {
     "lang": "eng",
     "description": "Splitter provenance",

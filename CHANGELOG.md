@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-09-28
+- Feature 8 (project cleanup): renamed `libs/` → `src/` (now a proper package with `__init__.py`) and moved `ui.py` into `src/`; only `main.py` remains at the repo root alongside `tests/`. Renamed `ui-text/` → `localization/`. All imports, path references and doc links updated.
+
 ## 2026-09-27
 - Feature 10: the app now has its own icon. `assets/icon.ico` (16/32/48 px, used via `iconbitmap` on Windows) and `assets/icon.png` (64×64, `PhotoImage` fallback on other platforms); applied in `create_main_window`.
 
