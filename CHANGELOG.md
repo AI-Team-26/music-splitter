@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-09-27
+- Feature 10: the app now has its own icon. `assets/icon.ico` (16/32/48 px, used via `iconbitmap` on Windows) and `assets/icon.png` (64×64, `PhotoImage` fallback on other platforms); applied in `create_main_window`.
+
 ## 2026-09-22
 - Feature 7: the internal in-memory log is now a real log file (`music_splitter.log`, appended, timestamped `[YYYY-MM-DDTHH:MM:SS] LEVEL message`). Splitter warnings (provenance config fallbacks, metadata copy failures) are written to the same file instead of `print()`. A **Show log…** button appears below SPLIT whenever a split operation fails; clicking it opens a read-only viewer with the current log contents.
 - Fixed `test_default_output_folder`: paths are now built with `os.path.join`/`abspath` instead of hardcoded POSIX strings, so the test passes on Windows too.

@@ -8,6 +8,28 @@ pad = 10 # common padding for UI
 pad_xs = 5 
 pad_xl = 20
 
+ASSETS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
+ICON_ICO = os.path.join(ASSETS_DIR, "icon.ico")
+ICON_PNG = os.path.join(ASSETS_DIR, "icon.png")
+
+
+def apply_window_icon(root):
+    """Set the window/taskbar icon; .ico on Windows, PNG fallback elsewhere.
+
+    Cosmetic only: never let an icon failure break window creation.
+    """
+    try:
+        root.iconbitmap(ICON_ICO)
+        return
+    except tk.TclError:
+        pass
+    try:
+        icon_img = tk.PhotoImage(file=ICON_PNG)
+        root._icon_img = icon_img  # keep a reference so Tk doesn't free it
+        root.iconphoto(True, icon_img)
+    except tk.TclError:
+        pass
+
 
 def create_main_window(root, browse_file, split_file, filename_format="numbers",
                        initial_part_length_m=10):
@@ -15,6 +37,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     root.title("Music Splitter")
     root.geometry("520x400")
+    apply_window_icon(root)
 
     main_frame = ttk.Frame(root, padding="20")
     main_frame.pack(fill=tk.BOTH, expand=True)
