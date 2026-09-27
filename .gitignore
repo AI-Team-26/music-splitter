@@ -1,3 +1,6 @@
 __pycache__/
 .venv/
+
+# application files
 settings.txt
+music_splitter.log
