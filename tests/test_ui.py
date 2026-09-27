@@ -4,7 +4,7 @@ import unittest
 import tkinter as tk
 from tkinter import ttk
 
-from ui import create_main_window
+from src.ui import create_main_window
 
 
 class TestMainWindow(unittest.TestCase):
@@ -129,7 +129,7 @@ class TestMainWindow(unittest.TestCase):
         self.assertEqual(log_btn.winfo_manager(), "")
 
     def test_log_viewer_shows_log_file_content(self):
-        import ui as uimod
+        import src.ui as uimod
         with tempfile.NamedTemporaryFile("w", suffix=".log", delete=False) as f:
             f.write("[2026-09-22T10:00:00] INFO Starting split process\n"
                     "[2026-09-22T10:00:05] ERROR Error during split: boom\n")

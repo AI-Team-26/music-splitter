@@ -3,8 +3,8 @@ import os
 import threading
 import tkinter as tk
 from tkinter import filedialog
-from ui import create_main_window
-from libs.splitter import MP3Splitter, LOG_FILE, get_logger
+from src.ui import create_main_window
+from src.splitter import MP3Splitter, LOG_FILE, get_logger
 
 SETTINGS_FILE = "settings.txt"
 logger = get_logger()
