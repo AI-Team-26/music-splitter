@@ -1,12 +1,28 @@
+import logging
 import os
 import threading
-from datetime import datetime
 import tkinter as tk
 from tkinter import filedialog
 from ui import create_main_window
-from libs.splitter import MP3Splitter
+from libs.splitter import MP3Splitter, LOG_FILE, get_logger
 
 SETTINGS_FILE = "settings.txt"
+logger = get_logger()
+
+
+def setup_logging():
+    """Point the shared 'music_splitter' logger at LOG_FILE (append mode).
+
+    Safe to call repeatedly: handlers are replaced, never stacked.
+    """
+    handler = logging.FileHandler(LOG_FILE, encoding="utf-8")
+    handler.setFormatter(logging.Formatter(
+        "[%(asctime)s] %(levelname)s %(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S",
+    ))
+    logger.handlers = [handler]
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
 
 
 def read_settings():
@@ -47,8 +63,7 @@ class MusicSplitterApp:
         self.root = tk.Tk()
         self.last_selected_file = ""
         self.last_dir = load_last_dir()
-        # In-memory log; will later be backed by a log file shown on failure
-        self.log_lines = []
+        setup_logging()
 
         # Load settings from settings.txt
         self.config = read_settings()
@@ -57,7 +72,8 @@ class MusicSplitterApp:
 
         # Initialize UI and get callback functions
         (self.update_file_label, self.set_message, self.set_enabled,
-         self.get_filename_format, self.get_part_length_m) = create_main_window(
+         self.get_filename_format, self.get_part_length_m,
+         self.set_log_button_visible) = create_main_window(
             self.root,
             self.on_browse_click,
             self.on_split_button_click,
@@ -65,9 +81,8 @@ class MusicSplitterApp:
             initial_part_length_m=self.part_length_m,
         )
 
-    def log_message(self, msg):
-        stamp = datetime.now().isoformat(timespec="seconds")
-        self.log_lines.append(f"[{stamp}] {msg}")
+    def log_message(self, msg, level=logging.INFO):
+        logger.log(level, msg)
 
     def select_file(self, extension):
         if not extension:
@@ -125,7 +140,7 @@ class MusicSplitterApp:
             self.log_message(f"Split complete: {len(created_files)} segments created in {output_folder}")
         except Exception as e:
             result = (None, str(e))
-            self.log_message(f"Error during split: {e}")
+            self.log_message(f"Error during split: {e}", logging.ERROR)
 
         # Persist settings and update the UI from the main thread only
         self.root.after(0, lambda: self._on_split_done(naming, part_length_m, *result))
@@ -138,6 +153,7 @@ class MusicSplitterApp:
 
         if error is not None:
             self.set_message(error, is_error=True)
+            self.set_log_button_visible(True)
         else:
             self.set_message(f"Done: {count} parts created")
         self.set_enabled(True)
