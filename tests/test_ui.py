@@ -81,7 +81,7 @@ class TestMainWindow(unittest.TestCase):
         self.assertIn("Done: 3 parts created", self._all_label_text())
 
     def test_set_error_message_uses_red_foreground(self):
-        self.set_message("boom", is_error=True)
+        self.set_message("boom", kind="error")
         labels = self._collect(self.root, ttk.Label, [])
         error_labels = [l for l in labels if "boom" in str(l.cget("text"))]
         self.assertTrue(error_labels)

@@ -133,14 +133,11 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
             file_var.set("No file selected")
             file_label.config(foreground="gray")
 
-    def set_message(msg, is_error=False, is_success=False):
+    _COLORS = {"error": "red", "success": "green"}
+
+    def set_message(msg, kind="info"):
         status_var.set(msg)
-        if is_error:
-            status_label.config(foreground="red")
-        elif is_success:
-            status_label.config(foreground="green")
-        else:
-            status_label.config(foreground="")
+        status_label.config(foreground=_COLORS.get(kind, ""))
 
     def set_enabled(enabled):
         state = tk.NORMAL if enabled else tk.DISABLED
