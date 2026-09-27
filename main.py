@@ -152,10 +152,10 @@ class MusicSplitterApp:
         save_setting("PART_LENGTH_MINUTES", str(part_length_m))
 
         if error is not None:
-            self.set_message(error, is_error=True)
+            self.set_message(f"Could not split the file: {error}", kind="error")
             self.set_log_button_visible(True)
         else:
-            self.set_message(f"Done: {count} parts created")
+            self.set_message(f"✓ Done — {count} parts created", kind="success")
         self.set_enabled(True)
 
     def close_app(self):
