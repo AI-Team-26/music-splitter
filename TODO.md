@@ -13,8 +13,11 @@
   - [ ] Inno Setup script `installer/music_splitter.iss`: exe into `{autoprogramfiles}`, Start Menu shortcut, uninstaller
   - [ ] Build workflow/script on a Windows runner (PyInstaller → ISCC)
   - [ ] README build instructions + CHANGELOG entry
+  - [ ] VS code task to run the installer builder locally
 
-- Feature 12: Windows installer variant that **bundles FFmpeg** (follow-up of Feature 6)
+- Feature 6.1: Add a proposed GH workflow for the Release of he installer
+
+- Feature 6.2: Windows installer variant that **bundles FFmpeg** (follow-up of Feature 6)
   Bundle a static `ffmpeg.exe` next to the app exe so users without FFmpeg get a self-contained install.
   Resolution order: bundled copy next to exe → system PATH → error.
 
