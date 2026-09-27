@@ -4,21 +4,18 @@ import threading
 import tkinter as tk
 from tkinter import filedialog
 from ui import create_main_window
-from libs.splitter import MP3Splitter
+from libs.splitter import MP3Splitter, LOG_FILE, get_logger
 
 SETTINGS_FILE = "settings.txt"
-LOG_FILE = "music_splitter.log"
-logger = logging.getLogger("music_splitter")
+logger = get_logger()
 
 
-def setup_logging(log_file=None):
-    """Point the shared 'music_splitter' logger at a log file (append mode).
+def setup_logging():
+    """Point the shared 'music_splitter' logger at LOG_FILE (append mode).
 
     Safe to call repeatedly: handlers are replaced, never stacked.
-    Returns the path actually used.
     """
-    path = log_file or LOG_FILE
-    handler = logging.FileHandler(path, encoding="utf-8")
+    handler = logging.FileHandler(LOG_FILE, encoding="utf-8")
     handler.setFormatter(logging.Formatter(
         "[%(asctime)s] %(levelname)s %(message)s",
         datefmt="%Y-%m-%dT%H:%M:%S",
@@ -26,7 +23,6 @@ def setup_logging(log_file=None):
     logger.handlers = [handler]
     logger.setLevel(logging.INFO)
     logger.propagate = False
-    return path
 
 
 def read_settings():
@@ -67,7 +63,7 @@ class MusicSplitterApp:
         self.root = tk.Tk()
         self.last_selected_file = ""
         self.last_dir = load_last_dir()
-        self.log_path = setup_logging()
+        setup_logging()
 
         # Load settings from settings.txt
         self.config = read_settings()
@@ -83,7 +79,6 @@ class MusicSplitterApp:
             self.on_split_button_click,
             filename_format=self.filename_format,
             initial_part_length_m=self.part_length_m,
-            log_file=self.log_path,
         )
 
     def log_message(self, msg, level=logging.INFO):

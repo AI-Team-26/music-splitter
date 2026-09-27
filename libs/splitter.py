@@ -8,8 +8,17 @@ import yaml
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, ID3NoHeaderError, COMM, TRK
 
-# Shared logger name so warnings land in the same music_splitter.log file.
-logger = logging.getLogger("music_splitter")
+# Shared logger name and log path so UI and library write to one place.
+LOGGER_NAME = "music_splitter"
+LOG_FILE = "music_splitter.log"
+
+
+def get_logger(name=LOGGER_NAME):
+    """Return the shared application logger."""
+    return logging.getLogger(name)
+
+
+logger = get_logger()
 
 UI_TEXT_FILE = Path(__file__).resolve().parent.parent / "ui-text" / "english.yml"
 # Built-in fallback used when ui-text/english.yml is missing, unparseable or incomplete.

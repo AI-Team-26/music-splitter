@@ -2,13 +2,15 @@ import os
 import tkinter as tk
 from tkinter import ttk
 
+from libs.splitter import LOG_FILE
+
 pad = 10 # common padding for UI
 pad_xs = 5 
 pad_xl = 20
 
 
 def create_main_window(root, browse_file, split_file, filename_format="numbers",
-                       initial_part_length_m=10, log_file=None):
+                       initial_part_length_m=10):
     style = ttk.Style()
 
     root.title("Music Splitter")
@@ -84,12 +86,11 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         text.pack(fill=tk.BOTH, expand=True)
         content = ""
-        if log_file:
-            try:
-                with open(log_file, encoding="utf-8") as f:
-                    content = f.read()
-            except OSError:
-                pass
+        try:
+            with open(LOG_FILE, encoding="utf-8") as f:
+                content = f.read()
+        except OSError:
+            pass
         text.insert(tk.END, content or "(no log available yet)")
         text.config(state=tk.DISABLED)
 
