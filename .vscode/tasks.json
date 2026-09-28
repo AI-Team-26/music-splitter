@@ -23,7 +23,7 @@
     {
       "label": "📥 Download Inno Setup",
       "type": "shell",
-      "command": "mkdir -p innosetup && curl -L -o innosetup/innosetup.exe https://jrsoftware.org/download.php/is.exe && innosetup/innosetup.exe /EXTRACT:innosetup /SP- /VERYSILENT && rm innosetup/innosetup.exe",
+      "command": "mkdir -p innosetup && curl -L -o innosetup/innosetup.exe https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe && innosetup/innosetup.exe /EXTRACT:innosetup /SP- /VERYSILENT && rm innosetup/innosetup.exe",
       "args": [],
       "options": {
         "cwd": "${workspaceFolder}"
