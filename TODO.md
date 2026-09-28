@@ -21,6 +21,7 @@
   Bundle a static `ffmpeg.exe` next to the app exe so users without FFmpeg get a self-contained install.
   Resolution order: bundled copy next to exe → system PATH → error.
 
+- Feature 10: Smart segment post-processing — merge short (<5min), split long (>15min) segments after fixed-duration split. Optional onset-snap refinement. See `Feature_10.md` for details.
 
 ## Done (last 20 teaks)
 
