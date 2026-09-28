@@ -48,6 +48,10 @@ def load_provenance(path: Path = UI_TEXT_FILE) -> dict:
     Falls back to DEFAULT_PROVENANCE with a warning when the resource cannot be read,
     so a broken configuration never prevents splitting or tagging.
     """
+    # Explicit existence check to catch missing resources early (e.g. PyInstaller bundling issues)
+    if not Path(path).exists():
+        logger.warning(f"Resource file not found at {path}; using built-in provenance text.")
+        return dict(DEFAULT_PROVENANCE)
     try:
         raw = Path(path).read_text(encoding="utf-8")
     except OSError as e:
