@@ -21,6 +21,7 @@ def get_logger(name=LOGGER_NAME):
 
 logger = get_logger()
 
+
 def resource_path(relative: str) -> Path:
     """Resolve a repository-relative resource path.
 
@@ -87,18 +88,10 @@ class MP3Splitter:
 
     @staticmethod
     def _find_ffmpeg() -> str:
-        """Locate ffmpeg on the system PATH.
-
-        This build does not bundle FFmpeg: users must have it installed and
-        reachable via PATH. Raises a user-friendly error with install guidance
-        when missing.
-        """
         path = shutil.which("ffmpeg")
         if not path:
             raise RuntimeError(
-                "FFmpeg was not found on your system PATH. "
-                "Install FFmpeg from https://www.gyan.dev/ffmpeg/builds/ "
-                "and add its 'bin' folder to PATH, then restart the app."
+                "FFmpeg was not found on PATH. Install FFmpeg and ensure 'ffmpeg' is accessible."
             )
         return path
 
