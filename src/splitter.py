@@ -91,7 +91,7 @@ class MP3Splitter:
         path = shutil.which("ffmpeg")
         if not path:
             raise RuntimeError(
-                "FFmpeg was not found on PATH. Install FFmpeg and ensure 'ffmpeg' is accessible."
+                "FFmpeg was not found on PATH. Install FFmpeg and ensure 'ffmpeg' is accessible.\nDownload: https://www.gyan.dev/ffmpeg/builds/"
             )
         return path
 
