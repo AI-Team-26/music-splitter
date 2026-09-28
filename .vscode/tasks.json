@@ -23,17 +23,7 @@
     {
       "label": "📥 Install Inno Setup",
       "type": "shell",
-      "command": "find_iscc() { local p; for p in \
-  '/c/Program Files/Inno Setup 7/ISCC.exe' \
-  '/c/Program Files (x86)/Inno Setup 7/ISCC.exe' \
-  '/c/Program Files/Inno Setup 6/ISCC.exe' \
-  '/c/Program Files (x86)/Inno Setup 6/ISCC.exe' \
-  '/c/Program Files/Inno Setup 5/ISCC.exe' \
-  '/c/Program Files (x86)/Inno Setup 5/ISCC.exe'; do \
-  [ -f \"$p\" ] && echo \"$p\" && return 0; done; return 1; }; \
-if iscc_path=$(find_iscc); then echo \"ISCC found at: $iscc_path\"; exit 0; fi; \
-if [ -f innosetup/ISCC.exe ]; then echo 'Inno Setup already installed locally'; exit 0; fi; \
-mkdir -p innosetup && curl -L -o innosetup/innosetup.exe https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe && innosetup/innosetup.exe /EXTRACT:\"${workspaceFolder}/innosetup\" /SP- /VERYSILENT && rm innosetup/innosetup.exe && if [ ! -f innosetup/ISCC.exe ]; then find innosetup -name ISCC.exe -exec cp {} innosetup/ISCC.exe \; ; fi",
+      "command": "bash scripts/find_iscc.sh",
       "args": [],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -48,23 +38,7 @@ mkdir -p innosetup && curl -L -o innosetup/innosetup.exe https://github.com/jrso
       "label": "📦 Build Windows Installer",
       "type": "shell",
       "dependsOn": "📥 Install Inno Setup",
-      "command": "find_iscc() { local p; for p in \
-  '/c/Program Files/Inno Setup 7/ISCC.exe' \
-  '/c/Program Files (x86)/Inno Setup 7/ISCC.exe' \
-  '/c/Program Files/Inno Setup 6/ISCC.exe' \
-  '/c/Program Files (x86)/Inno Setup 6/ISCC.exe' \
-  '/c/Program Files/Inno Setup 5/ISCC.exe' \
-  '/c/Program Files (x86)/Inno Setup 5/ISCC.exe'; do \
-  [ -f \"$p\" ] && echo \"$p\" && return 0; done; return 1; }; \
-if [ ! -x .venv/Scripts/python.exe ]; then echo 'ERROR: run \"Setup Project\" first'; exit 1; fi; \
-.venv/Scripts/python.exe -m PyInstaller music_splitter.spec && \
-if iscc_path=$(find_iscc); then \
-  echo \"Using ISCC at: $iscc_path\" && \"$iscc_path\" /Q installer/music_splitter.iss; \
-elif [ -f innosetup/ISCC.exe ]; then \
-  ./innosetup/ISCC.exe /Q installer/music_splitter.iss; \
-else \
-  echo 'ERROR: ISCC.exe not found' && exit 1; \
-fi",
+      "command": "if [ ! -x .venv/Scripts/python.exe ]; then echo 'ERROR: run \"Setup Project\" first'; exit 1; fi; .venv/Scripts/python.exe -m PyInstaller music_splitter.spec && bash scripts/build_installer.sh",
       "args": [],
       "options": {
         "cwd": "${workspaceFolder}"
