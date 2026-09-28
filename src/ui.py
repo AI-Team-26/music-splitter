@@ -2,15 +2,14 @@ import os
 import tkinter as tk
 from tkinter import ttk
 
-from src.splitter import LOG_FILE
+from src.splitter import LOG_FILE, resource_path
 
 pad = 10 # common padding for UI
 pad_xs = 5 
 pad_xl = 20
 
-ASSETS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
-ICON_ICO = os.path.join(ASSETS_DIR, "icon.ico")
-ICON_PNG = os.path.join(ASSETS_DIR, "icon.png")
+ICON_ICO = resource_path("assets/icon.ico")
+ICON_PNG = resource_path("assets/icon.png")
 
 
 def apply_window_icon(root):

@@ -12,7 +12,10 @@ a = Analysis(
     [os.path.join(ROOT, 'main.py')],
     pathex=[ROOT],
     binaries=[],
-    datas=[(os.path.join(ROOT, 'localization'), 'localization')],
+    datas=[
+        (os.path.join(ROOT, 'localization'), 'localization'),
+        (os.path.join(ROOT, 'assets'), 'assets'),
+    ],
     hiddenimports=['src', 'src.splitter', 'src.ui'],
     hookspath=[],
     runtime_hooks=[],
