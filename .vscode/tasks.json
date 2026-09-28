@@ -23,7 +23,7 @@
     {
       "label": "📥 Install Inno Setup",
       "type": "shell",
-      "command": "if [ -f innosetup/ISCC.exe ]; then echo 'Inno Setup already installed'; exit 0; fi; mkdir -p innosetup && curl -L -o innosetup/innosetup.exe https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe && innosetup/innosetup.exe /EXTRACT:innosetup /SP- /VERYSILENT && rm innosetup/innosetup.exe",
+      "command": "if command -v ISCC.exe >/dev/null 2>&1; then echo 'ISCC.exe found on PATH'; exit 0; fi; if [ -f innosetup/ISCC.exe ]; then echo 'Inno Setup already installed locally'; exit 0; fi; mkdir -p innosetup && curl -L -o innosetup/innosetup.exe https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe && innosetup/innosetup.exe /EXTRACT:"${workspaceFolder}/innosetup" /SP- /VERYSILENT && rm innosetup/innosetup.exe && if [ ! -f innosetup/ISCC.exe ]; then find innosetup -name ISCC.exe -exec cp {} innosetup/ISCC.exe \; ; fi",
       "args": [],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -38,7 +38,7 @@
       "label": "📦 Build Windows Installer",
       "type": "shell",
       "dependsOn": "📥 Install Inno Setup",
-      "command": "if [ ! -x .venv/Scripts/python.exe ]; then echo 'ERROR: run \"Setup Project\" first'; exit 1; fi; .venv/Scripts/python.exe -m PyInstaller music_splitter.spec && ./innosetup/ISCC.exe /Q installer/music_splitter.iss",
+      "command": "if [ ! -x .venv/Scripts/python.exe ]; then echo 'ERROR: run \"Setup Project\" first'; exit 1; fi; .venv/Scripts/python.exe -m PyInstaller music_splitter.spec && if command -v ISCC.exe >/dev/null 2>&1; then ISCC.exe /Q installer/music_splitter.iss; else ./innosetup/ISCC.exe /Q installer/music_splitter.iss; fi",
       "args": [],
       "options": {
         "cwd": "${workspaceFolder}"
