@@ -21,9 +21,9 @@
       }
     },
     {
-      "label": "📥 Download Inno Setup",
+      "label": "📥 Install Inno Setup",
       "type": "shell",
-      "command": "if [ -f innosetup/ISCC.exe ]; then echo 'Inno Setup already extracted'; exit 0; fi; mkdir -p innosetup && curl -L -o innosetup/innosetup.exe https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe && innosetup/innosetup.exe /EXTRACT:innosetup /SP- /VERYSILENT && rm innosetup/innosetup.exe",
+      "command": "if [ -f innosetup/ISCC.exe ]; then echo 'Inno Setup already installed'; exit 0; fi; mkdir -p innosetup && curl -L -o innosetup/innosetup.exe https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe && innosetup/innosetup.exe /EXTRACT:innosetup /SP- /VERYSILENT && rm innosetup/innosetup.exe",
       "args": [],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -37,7 +37,7 @@
     {
       "label": "📦 Build Windows Installer",
       "type": "shell",
-      "dependsOn": "📥 Download Inno Setup",
+      "dependsOn": "📥 Install Inno Setup",
       "command": "if [ ! -x .venv/Scripts/python.exe ]; then echo 'ERROR: run \"Setup Project\" first'; exit 1; fi; .venv/Scripts/python.exe -m PyInstaller music_splitter.spec && ./innosetup/ISCC.exe /Q installer/music_splitter.iss",
       "args": [],
       "options": {
