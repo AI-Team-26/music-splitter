@@ -17,6 +17,9 @@ if ! "$PY" -c 'import PyInstaller' >/dev/null 2>&1; then
     uv pip install pyinstaller
 fi
 
+# Remove previous outputs so PyInstaller never prompts to reuse them
+rm -rf dist build
+
 "$PY" -m PyInstaller music_splitter.spec
 
 source "$(dirname "$0")/find_iscc.sh"
