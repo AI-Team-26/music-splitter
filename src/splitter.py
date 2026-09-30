@@ -23,7 +23,7 @@ logger = get_logger()
 
 
 def resource_path(relative: str) -> Path:
-    """Resolve a repository-relative resource path.
+    """Find the correct path for assets (like YAML files). Works automatically during local development and when running as a packaged executable.
 
     When frozen by PyInstaller, resources live next to the executable inside
     the temporary extraction directory (sys._MEIPASS); otherwise relative to

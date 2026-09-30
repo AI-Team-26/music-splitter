@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Find ISCC.exe in common Inno Setup installation paths
-# Returns the path to ISCC.exe on stdout, exits 0 if found, 1 if not found
+# Find ISCC.exe (the Inno Setup compiler) in common installation paths.
+# Sourceable: defines find_iscc(). Run directly to print the found path or exit 1.
 
 find_iscc() {
   local p
@@ -16,26 +16,18 @@ find_iscc() {
       return 0
     fi
   done
+  if [ -f innosetup/ISCC.exe ]; then
+    echo 'innosetup/ISCC.exe'
+    return 0
+  fi
   return 1
 }
 
-if iscc_path=$(find_iscc); then
-  echo "ISCC found at: $iscc_path"
-  exit 0
-fi
-
-if [ -f innosetup/ISCC.exe ]; then
-  echo 'Inno Setup already installed locally'
-  exit 0
-fi
-
-# Download and extract Inno Setup
-mkdir -p innosetup
-curl -L -o innosetup/innosetup.exe https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe
-innosetup/innosetup.exe /EXTRACT:"${workspaceFolder}/innosetup" /SP- /VERYSILENT
-rm innosetup/innosetup.exe
-
-# Ensure ISCC.exe is at innosetup/ISCC.exe
-if [ ! -f innosetup/ISCC.exe ]; then
-  find innosetup -name ISCC.exe -exec cp {} innosetup/ISCC.exe \;
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  if iscc_path=$(find_iscc); then
+    echo "ISCC (InnoSetup executable) found at $iscc_path"
+    exit 0
+  fi
+  echo 'ERROR: ISCC (InnoSetup executable) not found'
+  exit 1
 fi

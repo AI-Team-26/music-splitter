@@ -1,2 +1,3 @@
 mutagen
 pyyaml
+pyinstaller
