@@ -62,8 +62,6 @@ jobs:
           name: v${{ env.RELEASE_DATE }}
           files: installer/output/*.exe
           body: ${{ steps.notes.outputs.body }}
-          allow_existing: true
-          overwrite_assets: true
           fail_on_unmatched_files: true
 
       # Releases are the permanent distribution channel; keep only the 3 newest so
