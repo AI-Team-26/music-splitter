@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2026-09-30
+- Feature 14: fixed the *Build Windows Installer* workflow — the old step downloaded a non-existent `innosetup-6.5.zip` from GitHub releases; Inno Setup is now installed via Chocolatey (`choco install innosetup`) and ISCC invoked from its standard path. Removed the stale `release.txt` workaround copy of the workflow.
 - Bug 11: log file and settings no longer live in the install directory. Installed apps under `C:\Program Files\Music Splitter\` are read-only for regular users, so startup crashed with `PermissionError` while opening `music_splitter.log` (and saving `settings.txt` silently failed). Runtime data now goes to a per-user writable location resolved by the `platformdirs` package (`%APPDATA%\MusicSplitter` on Windows, `~/.local/share/Music Splitter` on Linux) via new `get_data_dir()` in `src/splitter.py`; `LOG_FILE` and `SETTINGS_FILE` both derive from it (+ tests).
 
 ## 2026-09-29
