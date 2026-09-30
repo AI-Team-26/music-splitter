@@ -2,13 +2,13 @@
 
 ## Backlog
 
-- Feature 6.1: Add a proposed GH workflow for the Release of he installer
+- Feature 7: release.yml is not working
 
-- Feature 6.2: Windows installer variant that **bundles FFmpeg** (follow-up of Feature 6)
+- Feature 8 (low priority): Windows installer variant that **bundles FFmpeg** (follow-up of Feature 6)
   Bundle a static `ffmpeg.exe` next to the app exe so users without FFmpeg get a self-contained install.
   Resolution order: bundled copy next to exe → system PATH → error.
 
-- Feature 10: Smart segment post-processing — merge short (<5min), split long (>15min) segments after fixed-duration split. Optional onset-snap refinement. See `Feature_10.md` for details.
+- Feature 10 (investigation/POC): Smart segment post-processing — merge short (<5min), split long (>15min) segments after fixed-duration split. Optional onset-snap refinement. See `Feature_10.md` for details.
 
 ## Done (last 20 teaks)
 
