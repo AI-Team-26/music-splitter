@@ -33,7 +33,11 @@
   2. Release step uploads `MusicSplitter-Setup-v<date>.exe` directly from the build output (`installer/output/*.exe`) — no intermediate Actions artifact needed for this; release notes = latest `CHANGELOG.md` entry.
   3. Remove `upload-artifact` (or keep temporarily for debug copies).
   4. Set repo artifact retention to ~7 days (`PATCH /repos/{owner}/{repo}` → `actions_retention_days`, needs admin rights) so old artifacts auto-delete; Releases become the permanent channel.
-  5. Keep current triggers: push-to-main path filters + `workflow_dispatch`.
+  6. **Keep-last-3 cleanup**: after publishing/updating the release, delete older releases keeping only the latest 3 (counting the new one). Example:
+     ```bash
+     gh release list --limit 4 | tail -n +2 | cut -f1 | xargs -rn1 gh release delete --cleanup-tag
+     ```
+     Requires `delete-packages`/release write permission on the token. Caps cumulative asset size at ~3 × installer-size against the repo quota.
   Storage note: Actions artifacts count against the separate Actions storage quota (500 MB/repo free) and expire by retention; Release assets count against the repository size limit (default 5 GB soft cap, shared with git/LFS) and never expire until deleted manually. Monitor cumulative installer size if building daily.
   Blocker: editing `.github/workflows/release.yml` requires PAT `workflow` scope (see PR #50 `release.txt` workaround).
 
