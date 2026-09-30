@@ -9,3 +9,6 @@ music_splitter.log
 agent_build/
 dist/
 build/
+
+# installer output
+installer/
