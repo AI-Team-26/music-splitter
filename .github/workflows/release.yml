@@ -13,6 +13,10 @@ on:
       - 'assets/**'
       - '.github/workflows/release.yml'
 
+# required to write releas
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
