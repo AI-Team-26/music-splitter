@@ -3,7 +3,7 @@
 ; Compile with: ISCC.exe /Q installer\music_splitter.iss   (output in installer/output/)
 
 #define MyAppName "Music Splitter"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "0.0.1"
 #define MyAppPublisher "Alessandro Piccione"
 #define MyAppExeName "MusicSplitter.exe"
 
