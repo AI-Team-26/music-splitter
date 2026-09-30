@@ -2,6 +2,7 @@
 
 An utility tool designed to split large MP3 audio files into smaller segments based on a specified duration while preserving ID3 metadata (Artist, Album, Title). It ensures that the resulting files are ready for playback on various media players.
 
+[![CI](https://github.com/AI-Team-26/music-splitter/actions/workflows/ci.yml/badge.svg)](https://github.com/AI-Team-26/music-splitter/actions/workflows/ci.yml)
 [![Build Windows Installer](https://github.com/AI-Team-26/music-splitter/actions/workflows/release.yml/badge.svg)](https://github.com/AI-Team-26/music-splitter/actions/workflows/release.yml)
 
 ## Features
