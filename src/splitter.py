@@ -6,12 +6,27 @@ import subprocess
 import sys
 from pathlib import Path
 import yaml
+from platformdirs import user_data_dir
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, ID3NoHeaderError, COMM, TRK
 
 # Shared logger name and log path so UI and library write to one place.
 LOGGER_NAME = "music_splitter"
-LOG_FILE = "music_splitter.log"
+
+
+def get_data_dir() -> Path:
+    """Per-user writable directory for runtime data (log, settings).
+
+    Installed apps live in Program Files which is read-only for regular
+    users, so all mutable files must go elsewhere (platformdirs picks the
+    per-OS convention, e.g. %APPDATA%\MusicSplitter on Windows).
+    """
+    base = Path(user_data_dir(appname="Music Splitter", appauthor=False))
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
+LOG_FILE = str(get_data_dir() / "music_splitter.log")
 
 
 def get_logger(name=LOGGER_NAME):
