@@ -2,97 +2,6 @@
 
 ## Backlog
 
-- Feature 13 | **Modernize Tkinter UI with `ttkthemes` and Custom Styling**  
-  
-  **Goal**: Replace the default Tkinter look with a modern theme and improve visual consistency.
-
-  ---
-  ### **Requirements**
-  1. **Integrate `ttkthemes`**:
-     - Install the library: `pip install ttkthemes>=3.2.0`.
-     - Apply a modern theme (e.g., `"plastik"`, `"clam"`, or `"equilux"` for dark mode) **before** creating any widgets.
-     - Example:
-       ```python
-       from ttkthemes import ThemedStyle
-       style = ThemedStyle(root)
-       style.set_theme("plastik")
-       ```
-
-  2. **Custom Styling**:
-     - Use `ttk.Style()` to customize:
-       - **Buttons**: Font (`Arial 10`), padding (`10px`), and colors (e.g., `#4CAF50` for the "SPLIT" button).
-       - **Labels**: Font (`Arial 10`), foreground color for disabled/active states.
-       - **Frames**: Padding and background colors (e.g., `#f0f0f0` for the status bar).
-     - Example:
-       ```python
-       style.configure("TButton", font=("Arial", 10), padding=10)
-       style.configure("Big.TButton", font=("Arial", 14, "bold"), background="#4CAF50", foreground="white")
-       style.configure("Status.TFrame", background="#f0f0f0")
-       ```
-
-  3. **Layout Improvements**:
-     - Replace `pack()` with `grid()` for the following widgets:
-       - `browse_frame`, `naming_frame`, `part_len_frame`, and `status_bar`.
-     - Ensure widgets **expand to fill available space** and maintain consistent padding (`padx=10`, `pady=5`).
-     - Example:
-       ```python
-       browse_frame.grid(column=0, row=0, sticky=tk.W, pady=5)
-       naming_frame.grid(column=0, row=1, sticky=tk.W+tk.E, pady=5)
-       root.grid_columnconfigure(0, weight=1)
-       ```
-
-  4. **Add Icons**:
-     - Use `Pillow` to load and display icons for the "Browse" and "SPLIT" buttons.
-     - Icons should be `16x16` pixels and placed in the `assets/` directory (`browse_icon.png`, `split_icon.png`).
-     - Example:
-       ```python
-       from PIL import Image, ImageTk
-       browse_icon = ImageTk.PhotoImage(Image.open("assets/browse_icon.png").resize((16, 16)))
-       browse_button.config(image=browse_icon, compound=tk.LEFT)
-       ```
-
-  5. **Dark Mode Toggle (Stretch Goal)**:
-     - Add a checkbox to toggle between light (`"plastik"`) and dark (`"equilux"`) themes.
-     - Persist the theme preference in a `config.json` file.
-     - Example:
-       ```python
-       theme_var = tk.StringVar(value="plastik")
-       ttk.Checkbutton(main_frame, text="Dark Mode", command=lambda: style.set_theme("equilux" if theme_var.get() else "plastik"))
-       ```
-
-  6. **Error Handling**:
-     - If `ttkthemes` is not installed, fall back to default Tkinter and show a warning in the status bar:
-       `"Warning: ttkthemes not installed. Using default theme."`.
-
-  ---
-  ### **Dependencies**
-  - Add to `requirements.txt`:
-    ```
-    ttkthemes>=3.2.0
-    Pillow>=10.0.0
-    ```
-
-  ---
-  ### **Files to Modify**
-  - `src/ui.py` (or the file containing `create_main_window`).
-  - `assets/browse_icon.png` (create if missing).
-  - `assets/split_icon.png` (create if missing).
-
-  ---
-  ### **Acceptance Criteria**
-  - [ ] Modern theme applied via `ttkthemes`.
-  - [ ] Custom styling for all `ttk` widgets (buttons, labels, frames).
-  - [ ] Icons added to "Browse" and "SPLIT" buttons.
-  - [ ] Layout uses `grid()` and expands to fill available space.
-  - [ ] Fallback to default Tkinter with a warning if `ttkthemes` is missing.
-  - [ ] *(Stretch)* Dark/light theme toggle works and persists.
-
-  ---
-  ### **Out of Scope**
-  - Functional changes to the splitting logic.
-  - Migration to PyQt/CustomTkinter.
-
-
 - Feature 8 (low priority): Windows installer variant that **bundles FFmpeg** (follow-up of Feature 6)
   Bundle a static `ffmpeg.exe` next to the app exe so users without FFmpeg get a self-contained install.
   Resolution order: bundled copy next to exe → system PATH → error.
@@ -115,6 +24,7 @@
 
 ## Done (last 20 teaks)
 
+- Feature 13: modernized Tkinter UI — `ttkthemes` plastik/equilux theming with graceful fallback warning, custom ttk styling (buttons, SPLIT green #4CAF50, status bar frame), grid layout for browse/naming/part-length/status areas, Pillow icons on Browse/SPLIT buttons (`assets/browse_icon.png`, `assets/split_icon.png`), dark-mode toggle persisted to `config.json`
 - Feature 14: fixed `release.yml` Inno Setup install — replaced the broken `innosetup-6.5.zip` GitHub-release download with Chocolatey (`choco install innosetup`), verified green on CI; removed the now-stale `release.txt` workaround copy
 - Feature 6: Windows installer (first step, no bundled FFmpeg) — PyInstaller spec, Inno Setup script, CI build workflow, VS Code task, robust FFmpeg resolution with install-guidance error
 - Feature 8: cleanup project structure — `libs/` → `src/` (+ `__init__.py`), `ui.py` moved into `src/`, `ui-text/` → `localization/`
