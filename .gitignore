@@ -11,4 +11,4 @@ dist/
 build/
 
 # installer output
-installer/
+installer/output/
