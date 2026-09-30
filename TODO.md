@@ -22,6 +22,22 @@
 
 - Feature 10 (investigation/POC): Smart segment post-processing — merge short (<5min), split long (>15min) segments after fixed-duration split. Optional onset-snap refinement. See `Feature_10.md` for details.
 
+- Feature 15 | UI dark mode default set as OS
+  """
+  import winreg
+
+  def is_dark_mode_windows():
+      try:
+          with winreg.OpenKey(
+              winreg.HKEY_CURRENT_USER,
+              r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+          ) as key:
+              value = winreg.QueryValueEx(key, "AppsUseLightTheme")[0]
+              return value == 0  # 0 = dark mode, 1 = light mode
+      except Exception:
+          return False
+  """
+
 ## Done (last 20 teaks)
 
 - Feature 13: modernized Tkinter UI — `ttkthemes` plastik/equilux theming with graceful fallback warning, custom ttk styling (buttons, SPLIT green #4CAF50, status bar frame), grid layout for browse/naming/part-length/status areas, Pillow icons on Browse/SPLIT buttons (`assets/browse_icon.png`, `assets/split_icon.png`), dark-mode toggle persisted to `config.json`
