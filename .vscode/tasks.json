@@ -38,7 +38,7 @@
       "label": "📦 Build Windows Installer",
       "type": "shell",
       "dependsOn": "📥 Install Inno Setup",
-      "command": "bash scripts/build_app.sh",
+      "command": "bash scripts/build_installer.sh",
       "args": [],
       "options": {
         "cwd": "${workspaceFolder}"
