@@ -4,9 +4,11 @@ import threading
 import tkinter as tk
 from tkinter import filedialog
 from src.ui import create_main_window
-from src.splitter import MP3Splitter, LOG_FILE, get_logger
+from src.splitter import MP3Splitter, LOG_FILE, get_data_dir, get_logger
 
-SETTINGS_FILE = "settings.txt"
+# Settings live next to the log file in a per-user writable location;
+# the install dir (Program Files) is read-only for regular users.
+SETTINGS_FILE = str(get_data_dir() / "settings.txt")
 logger = get_logger()
 
 

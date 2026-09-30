@@ -11,7 +11,24 @@ from mutagen.id3 import ID3, ID3NoHeaderError, COMM, TRK
 
 # Shared logger name and log path so UI and library write to one place.
 LOGGER_NAME = "music_splitter"
-LOG_FILE = "music_splitter.log"
+
+
+def get_data_dir() -> Path:
+    """Per-user writable directory for runtime data (log, settings).
+
+    Installed apps live in Program Files which is read-only for regular
+    users, so all mutable files must go elsewhere (%LOCALAPPDATA% on Windows,
+    ~/.local/share on POSIX).
+    """
+    if sys.platform == "win32":
+        base = Path(os.environ.get("LOCALAPPDATA", Path.home())) / "Music Splitter"
+    else:
+        base = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "music-splitter"
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
+LOG_FILE = str(get_data_dir() / "music_splitter.log")
 
 
 def get_logger(name=LOGGER_NAME):

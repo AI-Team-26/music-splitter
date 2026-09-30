@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-09-30
+- Bug 11: log file and settings no longer live in the install directory. Installed apps under `C:\Program Files\Music Splitter\` are read-only for regular users, so startup crashed with `PermissionError` while opening `music_splitter.log` (and saving `settings.txt` silently failed). Runtime data now goes to a per-user writable location — `%LOCALAPPDATA%\Music Splitter` on Windows, `$XDG_DATA_HOME/music-splitter` (default `~/.local/share`) otherwise — via new `get_data_dir()` in `src/splitter.py`; `LOG_FILE` and `SETTINGS_FILE` both derive from it (+ tests).
+
 ## 2026-09-29
 - Feature 6: Windows installer pipeline (first step, without bundled FFmpeg). Added `music_splitter.spec` (PyInstaller onedir, windowed, app icon, bundles `localization/english.yml`), Inno Setup script `installer/music_splitter.iss` (`{autoprogfiles}` install dir, Start Menu + optional desktop shortcuts, uninstaller), a *Build Windows Installer* GitHub workflow (windows-latest: PyInstaller → ISCC, uploads the setup exe as an artifact), and a "📦 Build Windows Installer" VS Code task. `src/splitter.py` now resolves resources via `sys._MEIPASS` when frozen, and `_find_ffmpeg()` raises a user-facing error with install guidance when FFmpeg is not on PATH (+ tests).
 
