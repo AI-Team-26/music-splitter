@@ -2,6 +2,19 @@
 
 ## Backlog
 
+- Bug 11 | Installed .exe lack perlissions to write log file
+  """
+  Traceback (most recent call last):
+  File "main.py", line 169, in <module>
+  File "main.py", line 66, in __init__
+  File "main.py", line 18, in setup_logging
+  File "logging\__init__.py", line 1219, in __init__
+  File "logging\__init__.py", line 1248, in _open
+  PermissionError: [Errno 13] Permission denied: 'C:\\Program Files\\Music Splitter\\music_splitter.log'
+  """
+  I assume it will also fail to read/write the settings file.
+
+
 - Feature 7: Fix `release.yml` — broken Inno Setup download
   Current step downloads `innosetup-6.5.zip` from GitHub releases which doesn't exist (releases only have compiled `.exe` installers).
   Best-practice options researched:
