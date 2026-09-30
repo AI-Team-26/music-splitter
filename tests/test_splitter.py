@@ -3,6 +3,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
+from unittest import mock
 import yaml as _yaml
 from src.splitter import (
     MP3Splitter,
@@ -241,6 +242,24 @@ class TestMP3Splitter(unittest.TestCase):
             frames = self._provenance_frames(part, prov)
             self.assertEqual(len(frames), 1)
             self.assertEqual(list(frames[0].text), [prov["text"]])
+
+class TestFfmpegResolution(unittest.TestCase):
+    """_find_ffmpeg resolves via system PATH and gives clear guidance when missing."""
+
+    def test_found_on_path(self):
+        fake = "/usr/bin/ffmpeg"
+        with mock.patch("shutil.which", return_value=fake):
+            self.assertEqual(MP3Splitter._find_ffmpeg(), fake)
+
+    def test_missing_raises_with_install_guidance(self):
+        with mock.patch("shutil.which", return_value=None):
+            with self.assertRaises(RuntimeError) as cm:
+                MP3Splitter._find_ffmpeg()
+            msg = str(cm.exception)
+            self.assertIn("FFmpeg", msg)
+            self.assertIn("PATH", msg)
+            self.assertIn("https://www.gyan.dev/ffmpeg/builds/", msg)
+
 
 if __name__ == '__main__':
     unittest.main()

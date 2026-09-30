@@ -4,7 +4,7 @@
     {
       "label": "🏗️ Setup Project",
       "type": "shell",
-      "command": "uv venv .venv --python 3.14 && uv pip install -r requirements.txt",
+      "command": "uv venv --clear .venv --python 3.14 && uv pip install -r requirements.txt",
       "problemMatcher": []
     },
     {
@@ -18,6 +18,34 @@
       "group": {
         "kind": "build",
         "isDefault": true
+      }
+    },
+    {
+      "label": "📥 Install Inno Setup",
+      "type": "shell",
+      "command": "bash scripts/install_innosetup.sh",
+      "args": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📦 Build Windows Installer",
+      "type": "shell",
+      "dependsOn": "📥 Install Inno Setup",
+      "command": "bash scripts/build_installer.sh",
+      "args": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
       }
     },
     {

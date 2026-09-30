@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-09-29
+- Feature 6: Windows installer pipeline (first step, without bundled FFmpeg). Added `music_splitter.spec` (PyInstaller onedir, windowed, app icon, bundles `localization/english.yml`), Inno Setup script `installer/music_splitter.iss` (`{autoprogfiles}` install dir, Start Menu + optional desktop shortcuts, uninstaller), a *Build Windows Installer* GitHub workflow (windows-latest: PyInstaller → ISCC, uploads the setup exe as an artifact), and a "📦 Build Windows Installer" VS Code task. `src/splitter.py` now resolves resources via `sys._MEIPASS` when frozen, and `_find_ffmpeg()` raises a user-facing error with install guidance when FFmpeg is not on PATH (+ tests).
+
 ## 2026-09-28
 - Feature 8 (project cleanup): renamed `libs/` → `src/` (now a proper package with `__init__.py`) and moved `ui.py` into `src/`; only `main.py` remains at the repo root alongside `tests/`. Renamed `ui-text/` → `localization/`. All imports, path references and doc links updated.
 

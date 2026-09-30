@@ -1,0 +1,49 @@
+name: Build Windows Installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'music_splitter.spec'
+      - 'installer/**'
+      - 'src/**'
+      - 'main.py'
+      - 'localization/**'
+      - 'assets/icon.ico'
+      - '.github/workflows/build-installer.yml'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt pyinstaller
+
+      - name: Download Inno Setup
+        shell: pwsh
+        run: |
+          $zip = "innosetup-6.5.zip"
+          Invoke-WebRequest -Uri "https://github.com/jrsoftware/issrc/releases/download/v6_5/$zip" -OutFile $zip
+          Expand-Archive $zip -DestinationPath .\innosetup
+
+      - name: Build app with PyInstaller
+        run: pyinstaller music_splitter.spec --workpath agent_build
+
+      - name: Compile installer with ISCC
+        shell: pwsh
+        run: .\innosetup\ISCC.exe /Q installer\music_splitter.iss
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MusicSplitter-Setup
+          path: installer/output/*.exe
