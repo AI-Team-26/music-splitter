@@ -93,7 +93,7 @@
   - Migration to PyQt/CustomTkinter.
 
 
-- Feature 7: Fix `release.yml` — broken Inno Setup download
+- Feature 14: Fix `release.yml` — broken Inno Setup download
   Current step downloads `innosetup-6.5.zip` from GitHub releases which doesn't exist (releases only have compiled `.exe` installers).
   Best-practice options researched:
   - **A. Chocolatey** *(recommended)*: `choco install innosetup --no-progress -y` → ISCC at `C:\Program Files (x86)\Inno Setup 6\ISCC.exe`
