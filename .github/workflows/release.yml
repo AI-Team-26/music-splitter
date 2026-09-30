@@ -39,8 +39,33 @@ jobs:
         run: |
           & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' /Q installer\music_splitter.iss
 
-      - name: Upload installer artifact
-        uses: actions/upload-artifact@v4
+      - name: Compute CalVer date
+        shell: bash
+        run: echo "RELEASE_DATE=$(date +%Y.%m.%d)" >> "$GITHUB_ENV"
+
+      - name: Rename installer with version
+        shell: pwsh
+        run: Move-Item installer\output\MusicSplitter-Setup-*.exe "installer/output/MusicSplitter-Setup-v${{ env.RELEASE_DATE }}.exe"
+
+      - name: Extract latest changelog entry
+        id: notes
+        shell: bash
+        run: |
+          awk '/^## /{if(found) exit; found=1} found' CHANGELOG.md > notes.txt
+          { echo "body<<EOF"; cat notes.txt; echo EOF; } >> "$GITHUB_OUTPUT"
+
+      # Same-day rebuilds update this release in place instead of creating a new one.
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v3
         with:
-          name: MusicSplitter-Setup
-          path: installer/output/*.exe
+          tag_name: v${{ env.RELEASE_DATE }}
+          name: v${{ env.RELEASE_DATE }}
+          files: installer/output/*.exe
+          body: ${{ steps.notes.outputs.body }}
+          fail_on_unmatched_files: true
+
+      # Releases are the permanent distribution channel; keep only the 3 newest so
+      # cumulative asset size stays bounded against the repository storage quota.
+      - name: Keep last 3 releases
+        if: always()
+        run: gh release list --limit 4 | tail -n +2 | cut -f1 | xargs -rn1 gh release delete --cleanup-tag
