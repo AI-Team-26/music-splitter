@@ -38,7 +38,7 @@
       "label": "📦 Build Windows Installer",
       "type": "shell",
       "dependsOn": "📥 Install Inno Setup",
-      "command": "if [ -x .venv/bin/python ]; then PY=.venv/bin/python; elif [ -x .venv/Scripts/python.exe ]; then PY=.venv/Scripts/python.exe; else echo 'ERROR: run \"Setup Project\" first'; exit 1; fi; \"$PY\" -m PyInstaller music_splitter.spec && bash scripts/build_installer.sh",
+      "command": "if [ -x .venv/bin/python ]; then PY=.venv/bin/python; elif [ -x .venv/Scripts/python.exe ]; then PY=.venv/Scripts/python.exe; else echo 'ERROR: run \"Setup Project\" first'; exit 1; fi; if ! \"$PY\" -c 'import PyInstaller' >/dev/null 2>&1; then echo 'PyInstaller not in venv, installing...'; uv pip install pyinstaller || exit 1; fi; \"$PY\" -m PyInstaller music_splitter.spec && bash scripts/build_installer.sh",
       "args": [],
       "options": {
         "cwd": "${workspaceFolder}"
