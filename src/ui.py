@@ -1,12 +1,13 @@
 import json
 import os
+import threading
 import tkinter as tk
 from tkinter import ttk
 
 from src.splitter import LOG_FILE, get_data_dir, resource_path
 
-pad = 10 # common padding for UI
-pad_xs = 5 
+pad = 10
+pad_xs = 5
 pad_xl = 20
 
 ICON_ICO = resource_path("assets/icon.ico")
@@ -18,12 +19,11 @@ LIGHT_THEME = "plastik"
 DARK_THEME = "equilux"
 THEME_CONFIG_FILE = str(get_data_dir() / "config.json")
 
+_SYSTEM_THEME_CACHE = None
+
 
 def apply_window_icon(root):
-    """Set the window/taskbar icon; .ico on Windows, PNG fallback elsewhere.
-
-    Cosmetic only: never let an icon failure break window creation.
-    """
+    """Set the window/taskbar icon; .ico on Windows, PNG fallback elsewhere."""
     try:
         root.iconbitmap(ICON_ICO)
         return
@@ -31,13 +31,39 @@ def apply_window_icon(root):
         pass
     try:
         icon_img = tk.PhotoImage(file=ICON_PNG)
-        root._icon_img = icon_img  # keep a reference so Tk doesn't free it
+        root._icon_img = icon_img
         root.iconphoto(True, icon_img)
     except tk.TclError:
         pass
 
 
+def get_windows_system_theme() -> bool:
+    """Return True if Windows system theme is dark mode.
+
+    Uses ctypes.windll.user32.SystemParametersInfo for reliable detection.
+    Cached after first call to avoid repeated API calls.
+    """
+    global _SYSTEM_THEME_CACHE
+    if _SYSTEM_THEME_CACHE is not None:
+        return _SYSTEM_THEME_CACHE
+
+    try:
+        windll = ctypes.windll
+        user32 = windll.user32
+        SPI_GETWINDOWSCOLOR = 0x005B
+
+        value = ctypes.c_int()
+        result = user32.SystemParametersInfo(SPI_GETWINDOWSCOLOR, 0, ctypes.byref(value), 0)
+        # 0 = light mode, 1 = dark mode
+        if result == 0 or value.value != 1:
+            return False
+        return True
+    except Exception:
+        return False
+
+
 def _load_theme_pref():
+    """Load saved theme preference from config file."""
     try:
         with open(THEME_CONFIG_FILE, encoding="utf-8") as f:
             return bool(json.load(f).get("dark_mode", False))
@@ -61,11 +87,7 @@ def _save_theme_pref(dark):
 
 
 def _button_image(root, path):
-    """Load a button icon via Pillow; None if unavailable or missing.
-
-    master is passed explicitly because ImageTk otherwise caches its own
-    (possibly destroyed) default root.
-    """
+    """Load a button icon via Pillow; None if unavailable or missing."""
     try:
         from PIL import Image, ImageTk
         img = Image.open(path).resize((16, 16))
@@ -76,6 +98,10 @@ def _button_image(root, path):
 
 def create_main_window(root, browse_file, split_file, filename_format="numbers",
                        initial_part_length_m=10):
+    """Create and configure the main application window.
+
+    Theme priority: saved user preference > Windows system theme.
+    """
     themed = True
     try:
         from ttkthemes import ThemedStyle
@@ -84,9 +110,11 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
         themed = False
         style = ttk.Style()
 
-    dark_mode = _load_theme_pref()
+    system_dark = get_windows_system_theme()
+    effective_dark = _load_theme_pref() or system_dark
+
     if themed:
-        style.set_theme(DARK_THEME if dark_mode else LIGHT_THEME)
+        style.set_theme(DARK_THEME if effective_dark else LIGHT_THEME)
 
     style.configure("TButton", font=("Arial", 10), padding=10)
     style.configure("Big.TButton", font=("Arial", 14, "bold"),
@@ -104,26 +132,15 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     main_frame.pack(fill=tk.BOTH, expand=True)
     main_frame.grid_columnconfigure(0, weight=1)
 
-    # Title label + dark mode toggle on the same row
     title_label = ttk.Label(main_frame, text="Music Splitter", font=("Arial", 16, "bold"))
     title_label.grid(row=0, column=0, sticky=tk.W, pady=(0, pad))
 
-    theme_var = tk.BooleanVar(value=dark_mode)
-    if themed:
-        def toggle_theme():
-            style.set_theme(DARK_THEME if theme_var.get() else LIGHT_THEME)
-            _save_theme_pref(theme_var.get())
-        dark_check = ttk.Checkbutton(main_frame, text="Dark Mode",
-                                     variable=theme_var, command=toggle_theme)
-        dark_check.grid(row=0, column=1, sticky=tk.E)
-
-    # Browse row: button + selected file name
     browse_frame = ttk.Frame(main_frame)
     browse_frame.grid(row=1, column=0, sticky="we", pady=(0, pad))
 
     browse_img = _button_image(root, BROWSE_ICON)
     if browse_img is not None:
-        root._browse_img = browse_img  # keep a reference so Tk doesn't free it
+        root._browse_img = browse_img
     browse_button = ttk.Button(browse_frame, text="Browse…", command=browse_file,
                                image=browse_img, compound=tk.LEFT)
     browse_button.pack(side=tk.LEFT)
@@ -132,43 +149,31 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     file_label = ttk.Label(browse_frame, textvariable=file_var, foreground="gray")
     file_label.pack(side=tk.LEFT, padx=(pad_xs * 2, 0))
 
-    # File names format selector
     naming_frame = ttk.LabelFrame(main_frame, text="File names", padding="10")
     naming_frame.grid(row=2, column=0, sticky="we", pady=(0, pad))
 
     naming_var = tk.StringVar(value=filename_format)
-    ttk.Radiobutton(
-        naming_frame, text="Numbers (\u201cpart_01.mp3\u201d)",
-        variable=naming_var, value="numbers",
-    ).pack(side=tk.LEFT, padx=(0, pad_xl))
-    ttk.Radiobutton(
-        naming_frame, text="File+Numbers (\u201cDJ-AAA_part_01.mp3\u201d)",
-        variable=naming_var, value="file+numbers",
-    ).pack(side=tk.LEFT)
+    ttk.Radiobutton(naming_frame, text="Numbers (part_01.mp3)",
+                     variable=naming_var, value="numbers").pack(side=tk.LEFT, padx=(0, pad_xl))
+    ttk.Radiobutton(naming_frame, text="File+Numbers (DJ-AAA_part_01.mp3)",
+                     variable=naming_var, value="file+numbers").pack(side=tk.LEFT)
 
-    # Part length selection (minutes: 5 / 10 / 15)
     part_len_var = tk.StringVar(value=str(initial_part_length_m))
     part_len_frame = ttk.LabelFrame(main_frame, text="Part length", padding="10")
     part_len_frame.grid(row=3, column=0, sticky="we", pady=(0, pad))
 
     for minutes in ("5", "10", "15"):
-        ttk.Radiobutton(
-            part_len_frame, text=f"{minutes} min",
-            variable=part_len_var, value=minutes,
-        ).pack(side=tk.LEFT, padx=(0, pad_xl))
+        ttk.Radiobutton(part_len_frame, text=f"{minutes} min",
+                        variable=part_len_var, value=minutes).pack(side=tk.LEFT, padx=(0, pad_xl))
 
-    # Big SPLIT button, disabled until a source file is selected
     split_img = _button_image(root, SPLIT_ICON)
     if split_img is not None:
         root._split_img = split_img
-    split_button = ttk.Button(
-        main_frame, text="SPLIT", style="Big.TButton",
-        state=tk.DISABLED, command=split_file,
-        image=split_img, compound=tk.LEFT,
-    )
+    split_button = ttk.Button(main_frame, text="SPLIT", style="Big.TButton",
+                              state=tk.DISABLED, command=split_file,
+                              image=split_img, compound=tk.LEFT)
     split_button.grid(row=4, column=0, sticky="we", pady=(pad, 0))
 
-    # Status area: fixed height directly below the Split button
     status_bar = ttk.Frame(main_frame, style="Status.TFrame", height=28)
     status_bar.grid(row=5, column=0, sticky="we", pady=(pad_xs, 0))
     status_bar.pack_propagate(False)
@@ -176,7 +181,6 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     status_label = ttk.Label(status_bar, textvariable=status_var, anchor=tk.W)
     status_label.pack(side=tk.LEFT, fill=tk.X)
 
-    # Log viewer button: hidden until an operation fails
     def show_log_viewer():
         win = tk.Toplevel(root)
         win.title("Music Splitter Log")
