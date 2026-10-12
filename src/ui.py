@@ -21,7 +21,10 @@ THEME_CONFIG_FILE = str(get_data_dir() / "config.json")
 
 
 def apply_window_icon(root):
-    """Set the window/taskbar icon; .ico on Windows, PNG fallback elsewhere."""
+    """Set the window/taskbar icon; .ico on Windows, PNG fallback elsewhere.
+
+    Cosmetic only: never let an icon failure break window creation.
+    """
     try:
         root.iconbitmap(ICON_ICO)
         return
@@ -29,13 +32,13 @@ def apply_window_icon(root):
         pass
     try:
         icon_img = tk.PhotoImage(file=ICON_PNG)
-        root._icon_img = icon_img
+        root._icon_img = icon_img  # keep a reference so Tk doesn't free it
         root.iconphoto(True, icon_img)
     except tk.TclError:
         pass
 
 
-def get_windows_system_theme() -> bool:
+def is_system_theme_dark() -> bool:
     """Return True if the Windows system theme is set to dark mode."""
     try:
         import winreg
@@ -50,12 +53,15 @@ def get_windows_system_theme() -> bool:
 
 
 def _load_theme_pref():
-    """Load saved theme preference from config file."""
+    """Load saved theme preference. Returns None if no explicit choice was made."""
     try:
         with open(THEME_CONFIG_FILE, encoding="utf-8") as f:
-            return bool(json.load(f).get("dark_mode", False))
+            data = json.load(f)
+            if "dark_mode" in data:
+                return bool(data["dark_mode"])
     except (OSError, ValueError):
-        return False
+        pass
+    return None
 
 
 def _save_theme_pref(dark):
@@ -88,6 +94,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     """Create and configure the main application window.
 
     Theme priority: saved user preference > Windows system theme.
+    If no explicit preference exists, follow the OS setting.
     """
     themed = True
     try:
@@ -97,8 +104,8 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
         themed = False
         style = ttk.Style()
 
-    system_dark = get_windows_system_theme()
-    effective_dark = _load_theme_pref() or system_dark
+    pref = _load_theme_pref()
+    effective_dark = pref if pref is not None else is_system_theme_dark()
 
     if themed:
         style.set_theme(DARK_THEME if effective_dark else LIGHT_THEME)
@@ -119,16 +126,18 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     main_frame.pack(fill=tk.BOTH, expand=True)
     main_frame.grid_columnconfigure(0, weight=1)
 
+    # Title label
     title_label = ttk.Label(main_frame, text="Music Splitter", font=("Arial", 16, "bold"))
     title_label.grid(row=0, column=0, sticky=tk.W, pady=(0, pad))
 
+    # Browse row: button + selected file name
     browse_frame = ttk.Frame(main_frame)
     browse_frame.grid(row=1, column=0, sticky="we", pady=(0, pad))
 
     browse_img = _button_image(root, BROWSE_ICON)
     if browse_img is not None:
-        root._browse_img = browse_img
-    browse_button = ttk.Button(browse_frame, text="Browse…", command=browse_file,
+        root._browse_img = browse_img  # keep a reference so Tk doesn't free it
+    browse_button = ttk.Button(browse_frame, text="Browse\u2026", command=browse_file,
                                image=browse_img, compound=tk.LEFT)
     browse_button.pack(side=tk.LEFT)
 
@@ -136,23 +145,32 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     file_label = ttk.Label(browse_frame, textvariable=file_var, foreground="gray")
     file_label.pack(side=tk.LEFT, padx=(pad_xs * 2, 0))
 
+    # File names format selector
     naming_frame = ttk.LabelFrame(main_frame, text="File names", padding="10")
     naming_frame.grid(row=2, column=0, sticky="we", pady=(0, pad))
 
     naming_var = tk.StringVar(value=filename_format)
-    ttk.Radiobutton(naming_frame, text="Numbers (part_01.mp3)",
-                     variable=naming_var, value="numbers").pack(side=tk.LEFT, padx=(0, pad_xl))
-    ttk.Radiobutton(naming_frame, text="File+Numbers (DJ-AAA_part_01.mp3)",
-                     variable=naming_var, value="file+numbers").pack(side=tk.LEFT)
+    ttk.Radiobutton(
+        naming_frame, text="Numbers (\u201cpart_01.mp3\u201d)",
+        variable=naming_var, value="numbers",
+    ).pack(side=tk.LEFT, padx=(0, pad_xl))
+    ttk.Radiobutton(
+        naming_frame, text="File+Numbers (\u201cDJ-AAA_part_01.mp3\u201d)",
+        variable=naming_var, value="file+numbers",
+    ).pack(side=tk.LEFT)
 
+    # Part length selection (minutes: 5 / 10 / 15)
     part_len_var = tk.StringVar(value=str(initial_part_length_m))
     part_len_frame = ttk.LabelFrame(main_frame, text="Part length", padding="10")
     part_len_frame.grid(row=3, column=0, sticky="we", pady=(0, pad))
 
     for minutes in ("5", "10", "15"):
-        ttk.Radiobutton(part_len_frame, text=f"{minutes} min",
-                        variable=part_len_var, value=minutes).pack(side=tk.LEFT, padx=(0, pad_xl))
+        ttk.Radiobutton(
+            part_len_frame, text=f"{minutes} min",
+            variable=part_len_var, value=minutes,
+        ).pack(side=tk.LEFT, padx=(0, pad_xl))
 
+    # Big SPLIT button, disabled until a source file is selected
     split_img = _button_image(root, SPLIT_ICON)
     if split_img is not None:
         root._split_img = split_img
@@ -161,6 +179,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
                               image=split_img, compound=tk.LEFT)
     split_button.grid(row=4, column=0, sticky="we", pady=(pad, 0))
 
+    # Status area: fixed height directly below the Split button
     status_bar = ttk.Frame(main_frame, style="Status.TFrame", height=28)
     status_bar.grid(row=5, column=0, sticky="we", pady=(pad_xs, 0))
     status_bar.pack_propagate(False)
@@ -168,6 +187,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     status_label = ttk.Label(status_bar, textvariable=status_var, anchor=tk.W)
     status_label.pack(side=tk.LEFT, fill=tk.X)
 
+    # Log viewer button: hidden until an operation fails
     def show_log_viewer():
         win = tk.Toplevel(root)
         win.title("Music Splitter Log")
@@ -186,7 +206,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
         text.insert(tk.END, content or "(no log available yet)")
         text.config(state=tk.DISABLED)
 
-    log_button = ttk.Button(main_frame, text="Show log…", command=show_log_viewer)
+    log_button = ttk.Button(main_frame, text="Show log\u2026", command=show_log_viewer)
 
     def set_log_button_visible(visible):
         if visible:
