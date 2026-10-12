@@ -8,24 +8,9 @@
 
 - Feature 10 (investigation/POC): Smart segment post-processing — merge short (<5min), split long (>15min) segments after fixed-duration split. Optional onset-snap refinement. See `Feature_10.md` for details.
 
-- Feature 15 | UI dark mode default set as OS
-  """
-  import winreg
-
-  def is_dark_mode_windows():
-      try:
-          with winreg.OpenKey(
-              winreg.HKEY_CURRENT_USER,
-              r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
-          ) as key:
-              value = winreg.QueryValueEx(key, "AppsUseLightTheme")[0]
-              return value == 0  # 0 = dark mode, 1 = light mode
-      except Exception:
-          return False
-  """
-
 ## Done (last 20 teaks)
 
+- Feature 15: UI dark mode follows Windows system theme at startup — replaced broken ctypes-based detection (missing import caused NameError) with winreg query of `AppsUseLightTheme`; returns False gracefully on non-Windows or registry errors.
 - Feature 12: durable installer distribution via GitHub Releases (CalVer) — `release.yml` now renames the built exe to `MusicSplitter-Setup-vYYYY.MM.DD.exe` and publishes it as a date-tagged GitHub Release (`softprops/action-gh-release@v3`, which updates an existing release for the same tag in place and replaces same-named assets by default, so same-day rebuilds never create duplicates), with the latest `CHANGELOG.md` entry as release notes; replaced `upload-artifact`; keep-last-3 release cleanup caps cumulative asset size (repo Actions artifact retention still needs admin to be lowered to ~7 days).
 - Feature 13: modernized Tkinter UI — `ttkthemes` plastik/equilux theming with graceful fallback warning, custom ttk styling (buttons, SPLIT green #4CAF50, status bar frame), grid layout for browse/naming/part-length/status areas, Pillow icons on Browse/SPLIT buttons (`assets/browse_icon.png`, `assets/split_icon.png`), dark-mode toggle persisted to `config.json`
 - Feature 14: fixed `release.yml` Inno Setup install — replaced the broken `innosetup-6.5.zip` GitHub-release download with Chocolatey (`choco install innosetup`), verified green on CI; removed the now-stale `release.txt` workaround copy
