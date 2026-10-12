@@ -19,8 +19,6 @@ LIGHT_THEME = "plastik"
 DARK_THEME = "equilux"
 THEME_CONFIG_FILE = str(get_data_dir() / "config.json")
 
-_SYSTEM_THEME_CACHE = None
-
 
 def apply_window_icon(root):
     """Set the window/taskbar icon; .ico on Windows, PNG fallback elsewhere."""
@@ -38,26 +36,15 @@ def apply_window_icon(root):
 
 
 def get_windows_system_theme() -> bool:
-    """Return True if Windows system theme is dark mode.
-
-    Uses ctypes.windll.user32.SystemParametersInfo for reliable detection.
-    Cached after first call to avoid repeated API calls.
-    """
-    global _SYSTEM_THEME_CACHE
-    if _SYSTEM_THEME_CACHE is not None:
-        return _SYSTEM_THEME_CACHE
-
+    """Return True if the Windows system theme is set to dark mode."""
     try:
-        windll = ctypes.windll
-        user32 = windll.user32
-        SPI_GETWINDOWSCOLOR = 0x005B
-
-        value = ctypes.c_int()
-        result = user32.SystemParametersInfo(SPI_GETWINDOWSCOLOR, 0, ctypes.byref(value), 0)
-        # 0 = light mode, 1 = dark mode
-        if result == 0 or value.value != 1:
-            return False
-        return True
+        import winreg
+        with winreg.OpenKey(
+            winreg.HKEY_CURRENT_USER,
+            r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
+        ) as key:
+            value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
+            return value == 0  # 0 = dark, 1 = light
     except Exception:
         return False
 
