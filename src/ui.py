@@ -17,7 +17,7 @@ SPLIT_ICON = resource_path("assets/split_icon.png")
 
 LIGHT_THEME = "plastik"
 DARK_THEME = "equilux"
-THEME_CONFIG_FILE = str(get_data_dir() / "config.json")
+CONFIG_FILE = str(get_data_dir() / "config.json")
 
 # The status bar must match the surrounding themed frame surface, otherwise it
 # shows up as a mismatched panel (lighter or darker than the rest of the UI).
@@ -60,7 +60,7 @@ def is_system_theme_dark() -> bool:
 def _load_theme_pref():
     """Load saved theme preference. Returns None if no explicit choice was made."""
     try:
-        with open(THEME_CONFIG_FILE, encoding="utf-8") as f:
+        with open(CONFIG_FILE, encoding="utf-8") as f:
             data = json.load(f)
             if "dark_mode" in data:
                 return bool(data["dark_mode"])
@@ -72,13 +72,13 @@ def _load_theme_pref():
 def _save_theme_pref(dark):
     data = {}
     try:
-        with open(THEME_CONFIG_FILE, encoding="utf-8") as f:
+        with open(CONFIG_FILE, encoding="utf-8") as f:
             data = json.load(f)
     except (OSError, ValueError):
         pass
     data["dark_mode"] = dark
     try:
-        with open(THEME_CONFIG_FILE, "w", encoding="utf-8") as f:
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f)
     except OSError:
         pass
@@ -154,7 +154,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     browse_img = _button_image(root, BROWSE_ICON)
     if browse_img is not None:
         root._browse_img = browse_img  # keep a reference so Tk doesn't free it
-    browse_button = ttk.Button(browse_frame, text="Browse\u2026", command=browse_file,
+    browse_button = ttk.Button(browse_frame, text="Browse...", command=browse_file,
                                image=browse_img, compound=tk.LEFT)
     browse_button.pack(side=tk.LEFT)
 
@@ -223,7 +223,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
         text.insert(tk.END, content or "(no log available yet)")
         text.config(state=tk.DISABLED)
 
-    log_button = ttk.Button(main_frame, text="Show log\u2026", command=show_log_viewer)
+    log_button = ttk.Button(main_frame, text="Show log...", command=show_log_viewer)
 
     def set_log_button_visible(visible):
         if visible:

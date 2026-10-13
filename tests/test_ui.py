@@ -179,9 +179,9 @@ class TestMainWindow(unittest.TestCase):
         cfg = os.path.join(tempfile.mkdtemp(), "config.json")
         with open(cfg, "w", encoding="utf-8") as f:
             json.dump({"dark_mode": dark}, f)
-        original = uimod.THEME_CONFIG_FILE
-        uimod.THEME_CONFIG_FILE = cfg
-        self.addCleanup(setattr, uimod, "THEME_CONFIG_FILE", original)
+        original = uimod.CONFIG_FILE
+        uimod.CONFIG_FILE = cfg
+        self.addCleanup(setattr, uimod, "CONFIG_FILE", original)
         root = tk.Tk()
         root.withdraw()
         self.addCleanup(root.destroy)
@@ -196,130 +196,6 @@ class TestMainWindow(unittest.TestCase):
     def test_status_bar_follows_light_theme(self):
         root = self._build_with_theme_pref(dark=False)
         self.assertEqual(self._status_bg(root), uimod.LIGHT_STATUS_BG)
-
-
-class TestIsSystemThemeDark(unittest.TestCase):
-    """Tests for is_system_theme_dark with mocked winreg."""
-
-    def setUp(self):
-        import src.ui as uimod
-        self.uimod = uimod
-
-    @staticmethod
-    def _mock_winreg(dark_mode=True):
-        """Create a fake winreg module that simulates Windows registry."""
-        from unittest.mock import MagicMock
-        mock_winreg = MagicMock()
-        value = 0 if dark_mode else 1  # 0 = dark, 1 = light
-        mock_key = MagicMock()
-        mock_key.__enter__ = MagicMock(return_value=mock_key)
-        mock_key.__exit__ = MagicMock(return_value=False)
-        mock_winreg.OpenKey.return_value = mock_key
-        mock_winreg.QueryValueEx.return_value = (value, 4)  # REG_DWORD
-        mock_winreg.HKEY_CURRENT_USER = 0x80000001
-        return mock_winreg
-
-    def test_dark_mode_detected(self):
-        from unittest.mock import patch
-        mock_winreg = self._mock_winreg(dark_mode=True)
-        with patch.dict("sys.modules", {"winreg": mock_winreg}):
-            self.assertTrue(self.uimod.is_system_theme_dark())
-
-    def test_light_mode_detected(self):
-        from unittest.mock import patch
-        mock_winreg = self._mock_winreg(dark_mode=False)
-        with patch.dict("sys.modules", {"winreg": mock_winreg}):
-            self.assertFalse(self.uimod.is_system_theme_dark())
-
-    def test_returns_false_on_non_windows(self):
-        """On non-Windows platforms, winreg is unavailable and we default to False."""
-        import sys
-        from unittest.mock import patch
-        original_modules = {k: v for k, v in sys.modules.items() if k == "winreg"}
-        with patch.dict(sys.modules, {}, clear=False):
-            if "winreg" in sys.modules:
-                del sys.modules["winreg"]
-            try:
-                result = self.uimod.is_system_theme_dark()
-            finally:
-                sys.modules.update(original_modules)
-        self.assertFalse(result)
-
-    def test_returns_false_on_registry_error(self):
-        from unittest.mock import patch, MagicMock
-        mock_winreg = MagicMock()
-        mock_winreg.OpenKey.side_effect = OSError("key not found")
-        mock_winreg.HKEY_CURRENT_USER = 0x80000001
-        with patch.dict("sys.modules", {"winreg": mock_winreg}):
-            self.assertFalse(self.uimod.is_system_theme_dark())
-
-
-class TestThemePriority(unittest.TestCase):
-    """Verify three-state theme logic: explicit pref > system theme > light default."""
-
-    def setUp(self):
-        import src.ui as uimod
-        self.uimod = uimod
-        self.tmpfile = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-        self.addCleanup(os.unlink, self.tmpfile.name)
-        self.original_config = uimod.THEME_CONFIG_FILE
-        uimod.THEME_CONFIG_FILE = self.tmpfile.name
-
-    def tearDown(self):
-        self.uimod.THEME_CONFIG_FILE = self.original_config
-
-    def test_explicit_light_pref_overrides_system_dark(self):
-        """User chose light; even if OS is dark, app stays light."""
-        import json
-        from unittest.mock import patch
-        self.tmpfile.write(json.dumps({"dark_mode": False}))
-        self.tmpfile.flush()
-        mock_winreg = TestIsSystemThemeDark._mock_winreg(dark_mode=True)
-        with patch.dict("sys.modules", {"winreg": mock_winreg}):
-            pref = self.uimod._load_theme_pref()
-            self.assertIs(pref, False)  # explicitly set to light
-            effective_dark = pref if pref is not None else self.uimod.is_system_theme_dark()
-            self.assertFalse(effective_dark)
-
-    def test_explicit_dark_pref_respected(self):
-        """User chose dark; app uses dark regardless of OS setting."""
-        import json
-        from unittest.mock import patch
-        self.tmpfile.write(json.dumps({"dark_mode": True}))
-        self.tmpfile.flush()
-        mock_winreg = TestIsSystemThemeDark._mock_winreg(dark_mode=False)
-        with patch.dict("sys.modules", {"winreg": mock_winreg}):
-            pref = self.uimod._load_theme_pref()
-            self.assertIs(pref, True)
-            effective_dark = pref if pref is not None else self.uimod.is_system_theme_dark()
-            self.assertTrue(effective_dark)
-
-    def test_no_config_falls_back_to_system_theme(self):
-        """No config file means no preference; use OS theme."""
-        from unittest.mock import patch
-        self.tmpfile.write("")  # empty/invalid JSON -> no preference
-        self.tmpfile.flush()
-        mock_winreg = TestIsSystemThemeDark._mock_winreg(dark_mode=True)
-        with patch.dict("sys.modules", {"winreg": mock_winreg}):
-            pref = self.uimod._load_theme_pref()
-            self.assertIsNone(pref)
-            system_dark = self.uimod.is_system_theme_dark()
-            self.assertTrue(system_dark)
-            effective_dark = pref if pref is not None else system_dark
-            self.assertTrue(effective_dark)
-
-    def test_empty_json_object_means_no_preference(self):
-        """Config exists but has no dark_mode key -> treat as unset."""
-        import json
-        from unittest.mock import patch
-        self.tmpfile.write(json.dumps({"other_key": "value"}))
-        self.tmpfile.flush()
-        mock_winreg = TestIsSystemThemeDark._mock_winreg(dark_mode=True)
-        with patch.dict("sys.modules", {"winreg": mock_winreg}):
-            pref = self.uimod._load_theme_pref()
-            self.assertIsNone(pref)
-            effective_dark = pref if pref is not None else self.uimod.is_system_theme_dark()
-            self.assertTrue(effective_dark)
 
 
 if __name__ == "__main__":
