@@ -2,6 +2,8 @@
 
 ## Backlog
 
+- Bug 20 | In dark mode the wodow frame is still "light"
+
 - Bug 18 | Under the split button, in dark mode, there is a gray area (not taking the dark theme).
 
 - Feature 17 | The light/dark mode button  seems to stay on a separate column.
