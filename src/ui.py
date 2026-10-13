@@ -67,8 +67,8 @@ def _load_theme_pref():
             data = json.load(f)
             if "dark_mode" in data:
                 return bool(data["dark_mode"])
-    except (OSError, ValueError):
-        pass
+    except (OSError, ValueError) as err:
+        get_logger().warning("Could not read theme config (%s); using default.", err)
     return None
 
 
@@ -77,14 +77,14 @@ def _save_theme_pref(dark):
     try:
         with open(CONFIG_FILE, encoding="utf-8") as f:
             data = json.load(f)
-    except (OSError, ValueError):
-        pass
+    except (OSError, ValueError) as err:
+        get_logger().warning("Could not read existing config before saving (%s).", err)
     data["dark_mode"] = dark
     try:
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f)
-    except OSError:
-        pass
+    except OSError as err:
+        get_logger().error("Failed to save theme preference (%s).", err)
 
 
 def _button_image(root, path):
