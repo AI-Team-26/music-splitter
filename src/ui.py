@@ -18,6 +18,11 @@ LIGHT_THEME = "plastik"
 DARK_THEME = "equilux"
 THEME_CONFIG_FILE = str(get_data_dir() / "config.json")
 
+# The status bar sits on top of the themed surface; pick a per-theme colour
+# instead of one fixed value so it never shows as an unthemed grey panel.
+LIGHT_STATUS_BG = "#f0f0f0"   # plastik light surface
+DARK_STATUS_BG = "#373737"    # equilux window/surface
+
 
 def apply_window_icon(root):
     """Set the window/taskbar icon; .ico on Windows, PNG fallback elsewhere.
@@ -94,7 +99,9 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     style.map("Big.TButton",
               background=[("disabled", "#a5d6a7")],
               foreground=[("disabled", "gray")])
-    style.configure("Status.TFrame", background="#f0f0f0")
+    # ttk.Frame has no -background option here, so theme it through the Style.
+    style.configure("Status.TFrame",
+                    background=DARK_STATUS_BG if dark_mode else LIGHT_STATUS_BG)
 
     root.title("Music Splitter")
     root.geometry("520x400")
@@ -111,8 +118,11 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     theme_var = tk.BooleanVar(value=dark_mode)
     if themed:
         def toggle_theme():
-            style.set_theme(DARK_THEME if theme_var.get() else LIGHT_THEME)
-            _save_theme_pref(theme_var.get())
+            dark = theme_var.get()
+            style.set_theme(DARK_THEME if dark else LIGHT_THEME)
+            style.configure("Status.TFrame",
+                            background=DARK_STATUS_BG if dark else LIGHT_STATUS_BG)
+            _save_theme_pref(dark)
         dark_check = ttk.Checkbutton(main_frame, text="Dark Mode",
                                      variable=theme_var, command=toggle_theme)
         dark_check.grid(row=0, column=1, sticky=tk.E)
