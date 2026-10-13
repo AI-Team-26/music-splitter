@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-10-13
+- Bug 18: the status panel directly below the SPLIT button no longer shows an unthemed grey area in dark mode. Its background was hardcoded to light `#f0f0f0` through the `Status.TFrame` style regardless of theme; it is now themed per mode (`#f0f0f0` for `plastik`, `#373737` for `equilux`) and re-applied whenever the Dark Mode toggle switches themes (+ regression tests).
+
 ## 2026-09-30
 - Feature 12: installers are now distributed durably via GitHub Releases instead of expiring Actions artifacts. The *Build Windows Installer* workflow renames the compiled setup to `MusicSplitter-Setup-vYYYY.MM.DD.exe` (CalVer) and publishes it through `softprops/action-gh-release@v3`, which updates an existing release for the same tag in place and replaces same-named assets by default, so same-day rebuilds never create duplicates; release notes are taken from the latest `CHANGELOG.md` entry. A keep-last-3 step deletes older releases after each publish to cap cumulative asset size against the repository storage quota.
 - Feature 13: modernized the Tkinter UI. The window applies a `ttkthemes` theme (`plastik` light / `equilux` dark) before widget creation, falling back to default Tkinter with a status-bar warning when `ttkthemes` is missing. Custom `ttk.Style` configuration for buttons (Arial 10, padding), the big green SPLIT button (`#4CAF50`, muted when disabled) and the status bar frame; browse/naming/part-length/status rows moved from `pack()` to `grid()`. New 16×16 Pillow icons on the Browse and SPLIT buttons (`assets/browse_icon.png`, `assets/split_icon.png`). A Dark Mode checkbox toggles the theme live and persists the choice in `config.json` (per-user data dir). Added `ttkthemes>=3.2.0` and `Pillow>=10.0.0` to requirements.

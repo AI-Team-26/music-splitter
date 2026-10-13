@@ -2,15 +2,37 @@
 
 ## Backlog
 
+- Bug 20 | In dark mode the wodow frame is still "light"
+
+- Feature 17 | The light/dark mode button  seems to stay on a separate column.
+  The main controls should extends across the full width of the window.  
+
+- Feature 16 | Dark mode should not be an on/off option 
+  Icon-Only Switch: Replace the checkbox with a moon/sun icon toggle button in the top-right. 
+  This saves horizontal space and looks much cleaner.
+
+- Bug 15 | In dark mode the text is not really much reatable. Background is too light and foreground is too bright, not enough contrast.
+
 - Feature 8 (low priority): Windows installer variant that **bundles FFmpeg** (follow-up of Feature 6)
   Bundle a static `ffmpeg.exe` next to the app exe so users without FFmpeg get a self-contained install.
   Resolution order: bundled copy next to exe → system PATH → error.
 
 - Feature 10 (investigation/POC): Smart segment post-processing — merge short (<5min), split long (>15min) segments after fixed-duration split. Optional onset-snap refinement. See `Feature_10.md` for details.
 
+- Feature 21 | set theme stuff in a dedicated file
+  ```
+      style.map("Big.TButton",
+              background=[("disabled", "#a5d6a7")],
+              foreground=[("disabled", "gray")])
+  ```
+
+  "#a5d6a7" and other colors and properties shoulg go into theme.py file or similar.
+
+
 ## Done (last 20 teaks)
 
 - Feature 15: UI dark mode follows Windows system theme at startup — replaced broken ctypes-based detection (missing import caused NameError) with winreg query of `AppsUseLightTheme`; returns False gracefully on non-Windows or registry errors.
+- Bug 18: status bar under the SPLIT button now follows the active theme instead of staying a fixed light-grey panel in dark mode.
 - Feature 12: durable installer distribution via GitHub Releases (CalVer) — `release.yml` now renames the built exe to `MusicSplitter-Setup-vYYYY.MM.DD.exe` and publishes it as a date-tagged GitHub Release (`softprops/action-gh-release@v3`, which updates an existing release for the same tag in place and replaces same-named assets by default, so same-day rebuilds never create duplicates), with the latest `CHANGELOG.md` entry as release notes; replaced `upload-artifact`; keep-last-3 release cleanup caps cumulative asset size (repo Actions artifact retention still needs admin to be lowered to ~7 days).
 - Feature 13: modernized Tkinter UI — `ttkthemes` plastik/equilux theming with graceful fallback warning, custom ttk styling (buttons, SPLIT green #4CAF50, status bar frame), grid layout for browse/naming/part-length/status areas, Pillow icons on Browse/SPLIT buttons (`assets/browse_icon.png`, `assets/split_icon.png`), dark-mode toggle persisted to `config.json`
 - Feature 14: fixed `release.yml` Inno Setup install — replaced the broken `innosetup-6.5.zip` GitHub-release download with Chocolatey (`choco install innosetup`), verified green on CI; removed the now-stale `release.txt` workaround copy

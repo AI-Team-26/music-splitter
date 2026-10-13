@@ -1,9 +1,11 @@
+import json
 import os
 import tempfile
 import unittest
 import tkinter as tk
 from tkinter import ttk
 
+import src.ui as uimod
 from src.ui import create_main_window
 
 
@@ -168,6 +170,33 @@ class TestMainWindow(unittest.TestCase):
         finally:
             root2.destroy()
 
+    @staticmethod
+    def _status_bg(root):
+        # The status bar is themed through its Style (ttk.Frame has no -bg option).
+        return str(ttk.Style(root).lookup("Status.TFrame", "background"))
+
+    def _build_with_theme_pref(self, dark):
+        cfg = os.path.join(tempfile.mkdtemp(), "config.json")
+        with open(cfg, "w", encoding="utf-8") as f:
+            json.dump({"dark_mode": dark}, f)
+        original = uimod.THEME_CONFIG_FILE
+        uimod.THEME_CONFIG_FILE = cfg
+        self.addCleanup(setattr, uimod, "THEME_CONFIG_FILE", original)
+        root = tk.Tk()
+        root.withdraw()
+        self.addCleanup(root.destroy)
+        create_main_window(root, lambda: None, lambda: None)
+        return root
+
+    def test_status_bar_follows_dark_theme(self):
+        # Bug 18: the panel under SPLIT must not stay a fixed light grey in dark mode.
+        root = self._build_with_theme_pref(dark=True)
+        self.assertEqual(self._status_bg(root), uimod.DARK_STATUS_BG)
+
+    def test_status_bar_follows_light_theme(self):
+        root = self._build_with_theme_pref(dark=False)
+        self.assertEqual(self._status_bg(root), uimod.LIGHT_STATUS_BG)
+
 
 class TestIsSystemThemeDark(unittest.TestCase):
     """Tests for is_system_theme_dark with mocked winreg."""
@@ -205,6 +234,7 @@ class TestIsSystemThemeDark(unittest.TestCase):
     def test_returns_false_on_non_windows(self):
         """On non-Windows platforms, winreg is unavailable and we default to False."""
         import sys
+        from unittest.mock import patch
         original_modules = {k: v for k, v in sys.modules.items() if k == "winreg"}
         with patch.dict(sys.modules, {}, clear=False):
             if "winreg" in sys.modules:
