@@ -115,16 +115,16 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     title_label = ttk.Label(main_frame, text="Music Splitter", font=("Arial", 16, "bold"))
     title_label.grid(row=0, column=0, sticky=tk.W, pady=(0, pad))
 
-    theme_var = tk.BooleanVar(value=dark_mode)
+    is_dark_mode_var = tk.BooleanVar(value=dark_mode)
     if themed:
         def toggle_theme():
-            dark = theme_var.get()
+            dark = is_dark_mode_var.get()
             style.set_theme(DARK_THEME if dark else LIGHT_THEME)
             style.configure("Status.TFrame",
                             background=DARK_STATUS_BG if dark else LIGHT_STATUS_BG)
             _save_theme_pref(dark)
         dark_check = ttk.Checkbutton(main_frame, text="Dark Mode",
-                                     variable=theme_var, command=toggle_theme)
+                                     variable=is_dark_mode_var, command=toggle_theme)
         dark_check.grid(row=0, column=1, sticky=tk.E)
 
     # Browse row: button + selected file name
