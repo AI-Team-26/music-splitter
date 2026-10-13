@@ -5,6 +5,20 @@ import tkinter as tk
 from tkinter import ttk
 
 from src.splitter import LOG_FILE, get_data_dir, get_logger, resource_path
+from src.theme import (
+    BIG_BUTTON_BG,
+    BIG_BUTTON_DISABLED_BG,
+    BIG_BUTTON_DISABLED_FG,
+    BIG_BUTTON_FG,
+    DARK_STATUS_BG,
+    DARK_THEME,
+    FILE_LABEL_DEFAULT_FG,
+    LIGHT_STATUS_BG,
+    LIGHT_THEME,
+    MSG_ERROR,
+    MSG_SUCCESS,
+    status_bg,
+)
 
 pad = 10
 pad_xs = 5
@@ -15,14 +29,7 @@ ICON_PNG = resource_path("assets/icon.png")
 BROWSE_ICON = resource_path("assets/browse_icon.png")
 SPLIT_ICON = resource_path("assets/split_icon.png")
 
-LIGHT_THEME = "plastik"
-DARK_THEME = "equilux"
 CONFIG_FILE = str(get_data_dir() / "config.json")
-
-# The status bar must match the surrounding themed frame surface, otherwise it
-# shows up as a mismatched panel (lighter or darker than the rest of the UI).
-LIGHT_STATUS_BG = "#f0f0f0"   # plastik light surface
-DARK_STATUS_BG = "#464646"    # equilux frame surface (-bg), same as main_frame
 
 
 def apply_window_icon(root):
@@ -119,13 +126,13 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     style.configure("TButton", font=("Arial", 10), padding=10)
     style.configure("Big.TButton", font=("Arial", 14, "bold"),
-                    background="#4CAF50", foreground="white")
+                    background=BIG_BUTTON_BG, foreground=BIG_BUTTON_FG)
     style.map("Big.TButton",
-              background=[("disabled", "#a5d6a7")],
-              foreground=[("disabled", "gray")])
+              background=[("disabled", BIG_BUTTON_DISABLED_BG)],
+              foreground=[("disabled", BIG_BUTTON_DISABLED_FG)])
     # ttk.Frame has no -background option here, so theme it through the Style.
     style.configure("Status.TFrame",
-                    background=DARK_STATUS_BG if is_dark_mode else LIGHT_STATUS_BG)
+                    background=status_bg(is_dark_mode))
 
     root.title("Music Splitter")
     root.geometry("520x400")
@@ -145,7 +152,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
             dark = is_dark_mode_var.get()
             style.set_theme(DARK_THEME if dark else LIGHT_THEME)
             style.configure("Status.TFrame",
-                            background=DARK_STATUS_BG if dark else LIGHT_STATUS_BG)
+                            background=status_bg(dark))
             _save_theme_pref(dark)
         dark_check = ttk.Checkbutton(main_frame, text="Dark Mode",
                                      variable=is_dark_mode_var, command=toggle_theme)
@@ -162,7 +169,8 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     browse_button.pack(side=tk.LEFT)
 
     file_var = tk.StringVar(value="No file selected")
-    file_label = ttk.Label(browse_frame, textvariable=file_var, foreground="gray")
+    file_label = ttk.Label(browse_frame, textvariable=file_var,
+                           foreground=FILE_LABEL_DEFAULT_FG)
     file_label.pack(side=tk.LEFT, padx=(pad_xs * 2, 0))
 
     # File names format selector
@@ -240,13 +248,13 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
             file_label.config(foreground="")
         else:
             file_var.set("No file selected")
-            file_label.config(foreground="gray")
+            file_label.config(foreground=FILE_LABEL_DEFAULT_FG)
 
-    _COLORS = {"error": "red", "success": "green"}
+    _MSG_COLORS = {"error": MSG_ERROR, "success": MSG_SUCCESS}
 
     def set_message(msg, kind="info"):
         status_var.set(msg)
-        status_label.config(foreground=_COLORS.get(kind, ""))
+        status_label.config(foreground=_MSG_COLORS.get(kind, ""))
 
     def set_enabled(enabled):
         state = tk.NORMAL if enabled else tk.DISABLED

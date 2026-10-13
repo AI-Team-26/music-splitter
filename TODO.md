@@ -19,18 +19,9 @@
 
 - Feature 10 (investigation/POC): Smart segment post-processing — merge short (<5min), split long (>15min) segments after fixed-duration split. Optional onset-snap refinement. See `Feature_10.md` for details.
 
-- Feature 21 | set theme stuff in a dedicated file
-  ```
-      style.map("Big.TButton",
-              background=[("disabled", "#a5d6a7")],
-              foreground=[("disabled", "gray")])
-  ```
-
-  "#a5d6a7" and other colors and properties shoulg go into theme.py file or similar.
-
-
 ## Done (last 20 teaks)
 
+- Feature 21: extracted all hardcoded colors and theme constants from `src/ui.py` into a dedicated `src/theme.py` module (theme names, status bar backgrounds, SPLIT button colors, message colors, file label color) with a `status_bg()` helper; `ui.py` now imports from there.
 - Feature 15: UI dark mode follows Windows system theme at startup — replaced broken ctypes-based detection (missing import caused NameError) with winreg query of `AppsUseLightTheme`; returns False gracefully on non-Windows or registry errors.
 - Bug 18: status bar under the SPLIT button now follows the active theme instead of staying a fixed light-grey panel in dark mode.
 - Feature 12: durable installer distribution via GitHub Releases (CalVer) — `release.yml` now renames the built exe to `MusicSplitter-Setup-vYYYY.MM.DD.exe` and publishes it as a date-tagged GitHub Release (`softprops/action-gh-release@v3`, which updates an existing release for the same tag in place and replaces same-named assets by default, so same-day rebuilds never create duplicates), with the latest `CHANGELOG.md` entry as release notes; replaced `upload-artifact`; keep-last-3 release cleanup caps cumulative asset size (repo Actions artifact retention still needs admin to be lowered to ~7 days).

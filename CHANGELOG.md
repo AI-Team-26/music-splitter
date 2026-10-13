@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2026-10-13
+- Feature 21: extracted all hardcoded colors and theme constants from `src/ui.py` into a dedicated `src/theme.py` module — theme names, status bar backgrounds, SPLIT button colors (normal & disabled), message status colors, and file label default foreground are now centralized with a `status_bg()` helper.
 - Bug 18: the status panel directly below the SPLIT button no longer shows an unthemed grey area in dark mode. Its background was hardcoded to light `#f0f0f0` through the `Status.TFrame` style regardless of theme; it is now themed per mode (`#f0f0f0` for `plastik`, `#373737` for `equilux`) and re-applied whenever the Dark Mode toggle switches themes (+ regression tests).
 
 ## 2026-09-30
