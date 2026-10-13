@@ -35,6 +35,16 @@
           return False
   """
 
+- Feature 21 | set theme stuff in a dedicated file
+  ```
+      style.map("Big.TButton",
+              background=[("disabled", "#a5d6a7")],
+              foreground=[("disabled", "gray")])
+  ```
+
+  "#a5d6a7" and other colors and properties shoulg go into theme.py file or similar.
+
+
 ## Done (last 20 teaks)
 
 - Bug 18: status bar under the SPLIT button now follows the active theme instead of staying a fixed light-grey panel in dark mode.
