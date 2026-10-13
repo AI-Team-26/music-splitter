@@ -1,6 +1,14 @@
 # TODO
 
 ## Backlog
+- Feature 17 | The light/dark mode button  seems to stay on a separate column.
+  The main controls should extends across the full width of the window.  
+
+- Feature 16 | Dark mode should not be an on/off option 
+  Icon-Only Switch: Replace the checkbox with a moon/sun icon toggle button in the top-right. 
+  This saves horizontal space and looks much cleaner.
+
+- Bug 15 | In dark mode the text is not really much reatable. Background is too light and foreground is too bright, not enough contrast.
 
 - Feature 8 (low priority): Windows installer variant that **bundles FFmpeg** (follow-up of Feature 6)
   Bundle a static `ffmpeg.exe` next to the app exe so users without FFmpeg get a self-contained install.
