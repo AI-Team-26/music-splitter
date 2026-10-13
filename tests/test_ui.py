@@ -179,9 +179,9 @@ class TestMainWindow(unittest.TestCase):
         cfg = os.path.join(tempfile.mkdtemp(), "config.json")
         with open(cfg, "w", encoding="utf-8") as f:
             json.dump({"dark_mode": dark}, f)
-        original = uimod.THEME_CONFIG_FILE
-        uimod.THEME_CONFIG_FILE = cfg
-        self.addCleanup(setattr, uimod, "THEME_CONFIG_FILE", original)
+        original = uimod.CONFIG_FILE
+        uimod.CONFIG_FILE = cfg
+        self.addCleanup(setattr, uimod, "CONFIG_FILE", original)
         root = tk.Tk()
         root.withdraw()
         self.addCleanup(root.destroy)
