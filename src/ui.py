@@ -89,9 +89,9 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
         themed = False
         style = ttk.Style()
 
-    dark_mode = _load_theme_pref()
+    is_dark_mode = _load_theme_pref()
     if themed:
-        style.set_theme(DARK_THEME if dark_mode else LIGHT_THEME)
+        style.set_theme(DARK_THEME if is_dark_mode else LIGHT_THEME)
 
     style.configure("TButton", font=("Arial", 10), padding=10)
     style.configure("Big.TButton", font=("Arial", 14, "bold"),
@@ -101,7 +101,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
               foreground=[("disabled", "gray")])
     # ttk.Frame has no -background option here, so theme it through the Style.
     style.configure("Status.TFrame",
-                    background=DARK_STATUS_BG if dark_mode else LIGHT_STATUS_BG)
+                    background=DARK_STATUS_BG if is_dark_mode else LIGHT_STATUS_BG)
 
     root.title("Music Splitter")
     root.geometry("520x400")
@@ -115,7 +115,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     title_label = ttk.Label(main_frame, text="Music Splitter", font=("Arial", 16, "bold"))
     title_label.grid(row=0, column=0, sticky=tk.W, pady=(0, pad))
 
-    is_dark_mode_var = tk.BooleanVar(value=dark_mode)
+    is_dark_mode_var = tk.BooleanVar(value=is_dark_mode)
     if themed:
         def toggle_theme():
             dark = is_dark_mode_var.get()
