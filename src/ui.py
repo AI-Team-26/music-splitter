@@ -4,7 +4,7 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 
-from src.splitter import LOG_FILE, get_data_dir, resource_path
+from src.splitter import LOG_FILE, get_data_dir, get_logger, resource_path
 
 pad = 10
 pad_xs = 5
@@ -53,7 +53,10 @@ def is_system_theme_dark() -> bool:
         ) as key:
             value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
             return value == 0  # 0 = dark, 1 = light
-    except Exception:
+    except Exception as err:
+        get_logger().warning(
+            "Could not read Windows system theme (%s); defaulting to light.", err
+        )
         return False
 
 
