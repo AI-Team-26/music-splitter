@@ -18,10 +18,10 @@ LIGHT_THEME = "plastik"
 DARK_THEME = "equilux"
 THEME_CONFIG_FILE = str(get_data_dir() / "config.json")
 
-# The status bar sits on top of the themed surface; pick a per-theme colour
-# instead of one fixed value so it never shows as an unthemed grey panel.
+# The status bar must match the surrounding themed frame surface, otherwise it
+# shows up as a mismatched panel (lighter or darker than the rest of the UI).
 LIGHT_STATUS_BG = "#f0f0f0"   # plastik light surface
-DARK_STATUS_BG = "#373737"    # equilux window/surface
+DARK_STATUS_BG = "#464646"    # equilux frame surface (-bg), same as main_frame
 
 
 def apply_window_icon(root):
