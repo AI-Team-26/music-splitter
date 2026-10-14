@@ -15,8 +15,8 @@ from src.theme import (
     LIGHT_THEME,
     LIGHT_STATUS_BG,
     DARK_THEME,
-    DARK_STATUS_BG,    
-    FILE_LABEL_DEFAULT_FG,   
+    DARK_STATUS_BG,
+    FILE_LABEL_DEFAULT_FG,
     MSG_ERROR,
     MSG_SUCCESS,
     status_bg,
@@ -97,7 +97,7 @@ def _save_theme_pref(dark):
 
 
 def _button_image(root, path):
-    """Load a button icon via Pillow; None if unavailable or missing."""
+    """Load button icon via Pillow; None if unavailable or missing."""
     try:
         from PIL import Image, ImageTk
         img = Image.open(path).resize((16, 16))
@@ -131,6 +131,12 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     root.title("Music Splitter")
     root.geometry("520x400")
+    # Ensure the root window itself adopts the current theme's background.
+    # This fixes the issue where the window frame stayed light in dark mode.
+    if is_dark_mode:
+        root.config(background=DARK_STATUS_BG)
+    else:
+        root.config(background=LIGHT_STATUS_BG)
     apply_window_icon(root)
 
     main_frame = ttk.Frame(root, padding="20")
@@ -146,13 +152,14 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     def toggle_theme():
         dark = is_dark_mode_var.get()
         style.set_theme(DARK_THEME if dark else LIGHT_THEME)
+        # Refresh the root window background to match the new theme.
+        root.config(background=DARK_STATUS_BG if dark else LIGHT_STATUS_BG)
         style.configure("Status.TFrame",
                         background=status_bg(dark))
         _save_theme_pref(dark)
 
     dark_check = ttk.Checkbutton(main_frame, text="Dark Mode", variable=is_dark_mode_var, command=toggle_theme)
     dark_check.grid(row=0, column=1, sticky=tk.E)
-
     # Browse row: button + selected file name
     browse_frame = ttk.Frame(main_frame)
     browse_frame.grid(row=1, column=0, sticky="we", pady=(0, pad))
