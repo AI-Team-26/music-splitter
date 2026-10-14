@@ -3,9 +3,10 @@ import os
 import threading
 import tkinter as tk
 from tkinter import filedialog
+from src import get_data_dir
 from src.logging import log_info, setup_logging
 from src.ui import create_main_window
-from src.splitter import MP3Splitter, get_data_dir
+from src.splitter import MP3Splitter
 
 # Settings live next to the log file in a per-user writable location;
 # the install dir (Program Files) is read-only for regular users.
