@@ -20,6 +20,13 @@ def setup_logging():
     logger.setLevel(logging.INFO)
     logger.propagate = False
 
+def read_logs():
+    try:
+        with open(LOG_FILE, encoding="utf-8") as f:
+            return f.read()
+    except OSError as err:
+        return f"Failed to read log file. ${err}"    
+
 def log_info(msg):
     logger.info(msg)
 
