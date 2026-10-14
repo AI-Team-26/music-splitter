@@ -131,15 +131,15 @@ class TestMainWindow(unittest.TestCase):
         self.assertEqual(log_btn.winfo_manager(), "")
 
     def test_log_viewer_shows_log_file_content(self):
-        import src.ui as uimod
+        import src.logging as logging_mod
         with tempfile.NamedTemporaryFile("w", suffix=".log", delete=False) as f:
             f.write("[2026-09-22T10:00:00] INFO Starting split process\n"
                     "[2026-09-22T10:00:05] ERROR Error during split: boom\n")
             log_path = f.name
         self.addCleanup(os.unlink, log_path)
-        original_log_file = uimod.LOG_FILE
-        uimod.LOG_FILE = log_path
-        self.addCleanup(setattr, uimod, "LOG_FILE", original_log_file)
+        original_log_file = logging_mod.LOG_FILE
+        logging_mod.LOG_FILE = log_path
+        self.addCleanup(setattr, logging_mod, "LOG_FILE", original_log_file)
         root2 = tk.Tk()
         root2.withdraw()
         try:
