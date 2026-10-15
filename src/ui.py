@@ -107,25 +107,67 @@ def _button_image(root, path):
         return None
 
 
+# Flip to True if WM_NCACTIVATE alone doesn't force the frame recompute on
+# some Windows build; performs a visible 1px resize-and-back instead.
+TITLEBAR_FORCE_RESIZE_FALLBACK = False
+
+
+def _force_titlebar_repaint(user32, hwnd, root):
+    """Make DWM actually redraw the caption after the dark attribute changes."""
+    # Ask DWM to recompute the non-client area.
+    # SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED = 0x27
+    user32.SetWindowPos(hwnd, None, 0, 0, 0, 0, 0x27)
+    # Toggle caption activation off/on to trigger a full NC repaint without moving the window.
+    WM_NCACTIVATE = 0x0086
+    user32.SendMessageW(hwnd, WM_NCACTIVATE, False, 0)
+    user32.SendMessageW(hwnd, WM_NCACTIVATE, True, 0)
+    if TITLEBAR_FORCE_RESIZE_FALLBACK:
+        w, h = root.winfo_width(), root.winfo_height()
+        x, y = root.winfo_x(), root.winfo_y()
+        root.geometry(f"{w + 1}x{h}+{x}+{y}")
+        root.update_idletasks()
+        root.geometry(f"{w}x{h}+{x}+{y}")
+        root.update_idletasks()
+
+
 def set_titlebar_dark(root, dark):
     """Ask Windows to draw the title bar in dark or light mode (no-op elsewhere)."""
     if sys.platform != "win32":
         return
     try:
         import ctypes
+        from ctypes import wintypes
+
         root.update_idletasks()  # make sure the native window exists
         user32 = ctypes.windll.user32
-        hwnd = user32.GetParent(root.winfo_id()) or root.winfo_id()
+        dwmapi = ctypes.windll.dwmapi
+
+        user32.GetParent.argtypes = [wintypes.HWND]
+        user32.GetParent.restype = wintypes.HWND
+        dwmapi.DwmSetWindowAttribute.argtypes = [
+            wintypes.HWND, wintypes.UINT, wintypes.LPVOID, wintypes.UINT,
+        ]
+        dwmapi.DwmSetWindowAttribute.restype = ctypes.c_long
+        user32.SetWindowPos.argtypes = [
+            wintypes.HWND, wintypes.HWND, ctypes.c_int, ctypes.c_int,
+            ctypes.c_int, ctypes.c_int, wintypes.UINT,
+        ]
+        user32.SetWindowPos.restype = wintypes.BOOL
+        user32.SendMessageW.argtypes = [
+            wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM,
+        ]
+        user32.SendMessageW.restype = wintypes.LPARAM
+
+        hwnd = user32.GetParent(wintypes.HWND(root.winfo_id())) \
+            or wintypes.HWND(root.winfo_id())
         value = ctypes.c_int(1 if dark else 0)
         # Attribute 20 on Win10 20H1+/Win11; 19 on older Win10 builds.
         for attr in (20, 19):
-            if ctypes.windll.dwmapi.DwmSetWindowAttribute(
+            if dwmapi.DwmSetWindowAttribute(
                 hwnd, attr, ctypes.byref(value), ctypes.sizeof(value)
             ) == 0:
                 break
-        # Force the non-client area (title bar) to repaint.
-        # SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED = 0x27
-        user32.SetWindowPos(hwnd, 0, 0, 0, 0, 0, 0x27)
+        _force_titlebar_repaint(user32, hwnd, root)
     except Exception as err:
         log_warning("Could not set title bar theme (%s).", err)
 
