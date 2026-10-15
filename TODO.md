@@ -2,8 +2,6 @@
 
 ## Backlog
 
-- Bug 20 | In dark mode the wodow frame is still "light"
-
 - Feature 17 | The light/dark mode button  seems to stay on a separate column.
   The main controls should extends across the full width of the window.  
 
@@ -24,7 +22,9 @@
 - Fix 24 [DEPEND from Feature 17] | The text in the options of "File Names" secion are truncated. 
   Hopefully with the Feature 17 this will be solved. 
 
-## Done (last 20 teaks)
+## Done (last 20 tasks)
+
+- Bug 20: window frame now follows active theme — root background set explicitly at startup and refreshed on theme toggle
 
 - Feature 22 | avoid try/catch for import ThemedStyle from ttkthemes
 - Feature 21: extracted all hardcoded colors and theme constants from `src/ui.py` into a dedicated `src/theme.py` module (theme names, status bar backgrounds, SPLIT button colors, message colors, file label color) with a `status_bg()` helper; `ui.py` now imports from there.
