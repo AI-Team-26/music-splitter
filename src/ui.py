@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import tkinter as tk
 from tkinter import ttk
 from ttkthemes import ThemedStyle
@@ -15,8 +16,8 @@ from src.theme import (
     LIGHT_THEME,
     LIGHT_STATUS_BG,
     DARK_THEME,
-    DARK_STATUS_BG,    
-    FILE_LABEL_DEFAULT_FG,   
+    DARK_STATUS_BG,
+    FILE_LABEL_DEFAULT_FG,
     MSG_ERROR,
     MSG_SUCCESS,
     status_bg,
@@ -97,13 +98,78 @@ def _save_theme_pref(dark):
 
 
 def _button_image(root, path):
-    """Load a button icon via Pillow; None if unavailable or missing."""
+    """Load button icon via Pillow; None if unavailable or missing."""
     try:
         from PIL import Image, ImageTk
-        img = Image.open(path).resize((16, 16))
+        img = Image.open(path).resize((24, 24))
         return ImageTk.PhotoImage(img, master=root)
     except Exception:
         return None
+
+
+# Flip to True if WM_NCACTIVATE alone doesn't force the frame recompute on
+# some Windows build; performs a visible 1px resize-and-back instead.
+TITLEBAR_FORCE_RESIZE_FALLBACK = False
+
+
+def _force_titlebar_repaint(user32, hwnd, root):
+    """Make DWM actually redraw the caption after the dark attribute changes."""
+    # Ask DWM to recompute the non-client area.
+    # SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED = 0x27
+    user32.SetWindowPos(hwnd, None, 0, 0, 0, 0, 0x27)
+    # Toggle caption activation off/on to trigger a full NC repaint without moving the window.
+    WM_NCACTIVATE = 0x0086
+    user32.SendMessageW(hwnd, WM_NCACTIVATE, False, 0)
+    user32.SendMessageW(hwnd, WM_NCACTIVATE, True, 0)
+    if TITLEBAR_FORCE_RESIZE_FALLBACK:
+        w, h = root.winfo_width(), root.winfo_height()
+        x, y = root.winfo_x(), root.winfo_y()
+        root.geometry(f"{w + 1}x{h}+{x}+{y}")
+        root.update_idletasks()
+        root.geometry(f"{w}x{h}+{x}+{y}")
+        root.update_idletasks()
+
+
+def set_title_bar_theme(root, dark):
+    """Ask Windows to draw the title bar in dark or light mode (no-op elsewhere)."""
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        root.update_idletasks()  # make sure the native window exists
+        user32 = ctypes.windll.user32
+        dwmapi = ctypes.windll.dwmapi
+
+        user32.GetParent.argtypes = [wintypes.HWND]
+        user32.GetParent.restype = wintypes.HWND
+        dwmapi.DwmSetWindowAttribute.argtypes = [
+            wintypes.HWND, wintypes.UINT, wintypes.LPVOID, wintypes.UINT,
+        ]
+        dwmapi.DwmSetWindowAttribute.restype = ctypes.c_long
+        user32.SetWindowPos.argtypes = [
+            wintypes.HWND, wintypes.HWND, ctypes.c_int, ctypes.c_int,
+            ctypes.c_int, ctypes.c_int, wintypes.UINT,
+        ]
+        user32.SetWindowPos.restype = wintypes.BOOL
+        user32.SendMessageW.argtypes = [
+            wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM,
+        ]
+        user32.SendMessageW.restype = wintypes.LPARAM
+
+        hwnd = user32.GetParent(wintypes.HWND(root.winfo_id())) \
+            or wintypes.HWND(root.winfo_id())
+        value = ctypes.c_int(1 if dark else 0)
+        # Attribute 20 on Win10 20H1+/Win11; 19 on older Win10 builds.
+        for attr in (20, 19):
+            if dwmapi.DwmSetWindowAttribute(
+                hwnd, attr, ctypes.byref(value), ctypes.sizeof(value)
+            ) == 0:
+                break
+        _force_titlebar_repaint(user32, hwnd, root)
+    except Exception as err:
+        log_warning("Could not set title bar theme (%s).", err)
 
 
 def create_main_window(root, browse_file, split_file, filename_format="numbers",
@@ -131,7 +197,15 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     root.title("Music Splitter")
     root.geometry("520x400")
+    root.minsize(520, 400)
+    # Ensure the root window itself adopts the current theme's background.
+    # This fixes the issue where the window frame stayed light in dark mode.
+    if is_dark_mode:
+        root.config(background=DARK_STATUS_BG)
+    else:
+        root.config(background=LIGHT_STATUS_BG)
     apply_window_icon(root)
+    set_title_bar_theme(root, is_dark_mode)
 
     main_frame = ttk.Frame(root, padding="20")
     main_frame.pack(fill=tk.BOTH, expand=True)
@@ -146,13 +220,15 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     def toggle_theme():
         dark = is_dark_mode_var.get()
         style.set_theme(DARK_THEME if dark else LIGHT_THEME)
+        # Refresh the root window background to match the new theme.
+        root.config(background=DARK_STATUS_BG if dark else LIGHT_STATUS_BG)
         style.configure("Status.TFrame",
                         background=status_bg(dark))
+        set_title_bar_theme(root, dark)
         _save_theme_pref(dark)
 
     dark_check = ttk.Checkbutton(main_frame, text="Dark Mode", variable=is_dark_mode_var, command=toggle_theme)
     dark_check.grid(row=0, column=1, sticky=tk.E)
-
     # Browse row: button + selected file name
     browse_frame = ttk.Frame(main_frame)
     browse_frame.grid(row=1, column=0, sticky="we", pady=(0, pad))
