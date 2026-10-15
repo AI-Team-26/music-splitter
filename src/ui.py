@@ -2,6 +2,7 @@ import json
 import os
 import tkinter as tk
 from tkinter import ttk
+from ttkthemes import ThemedStyle
 
 from src import get_data_dir
 from src.logging import log_error, log_warning, read_logs
@@ -112,18 +113,12 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     Theme priority: saved user preference > Windows system theme.
     If no explicit preference exists, follow the OS setting.
     """
-    themed = True
-    try:
-        from ttkthemes import ThemedStyle
-        style = ThemedStyle(root)
-    except ImportError:
-        themed = False
-        style = ttk.Style()
+       
+    style = ThemedStyle(root)
 
     pref = _load_theme_pref()
     is_dark_mode = pref if pref is not None else is_system_theme_dark()
-    if themed:
-        style.set_theme(DARK_THEME if is_dark_mode else LIGHT_THEME)
+    style.set_theme(DARK_THEME if is_dark_mode else LIGHT_THEME)
 
     style.configure("TButton", font=("Arial", 10), padding=10)
     style.configure("Big.TButton", font=("Arial", 14, "bold"),
@@ -148,16 +143,17 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     title_label.grid(row=0, column=0, sticky=tk.W, pady=(0, pad))
 
     is_dark_mode_var = tk.BooleanVar(value=is_dark_mode)
-    if themed:
-        def toggle_theme():
-            dark = is_dark_mode_var.get()
-            style.set_theme(DARK_THEME if dark else LIGHT_THEME)
-            style.configure("Status.TFrame",
-                            background=status_bg(dark))
-            _save_theme_pref(dark)
-        dark_check = ttk.Checkbutton(main_frame, text="Dark Mode",
-                                     variable=is_dark_mode_var, command=toggle_theme)
-        dark_check.grid(row=0, column=1, sticky=tk.E)
+
+    def toggle_theme():
+        dark = is_dark_mode_var.get()
+        style.set_theme(DARK_THEME if dark else LIGHT_THEME)
+        style.configure("Status.TFrame",
+                        background=status_bg(dark))
+        _save_theme_pref(dark)
+    dark_check = ttk.Checkbutton(main_frame, text="Dark Mode",
+                                    variable=is_dark_mode_var, command=toggle_theme)
+    dark_check.grid(row=0, column=1, sticky=tk.E)
+    
     # Browse row: button + selected file name
     browse_frame = ttk.Frame(main_frame)
     browse_frame.grid(row=1, column=0, sticky="we", pady=(0, pad))
@@ -266,9 +262,6 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     def get_part_length_m():
         return int(part_len_var.get())
-
-    if not themed:
-        set_message("Warning: ttkthemes not installed. Using default theme.")
 
     return (update_file_label, set_message, set_enabled,
             get_filename_format, get_part_length_m, set_log_button_visible)

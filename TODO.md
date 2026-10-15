@@ -19,14 +19,14 @@
 
 - Feature 10 (investigation/POC): Smart segment post-processing — merge short (<5min), split long (>15min) segments after fixed-duration split. Optional onset-snap refinement. See `Feature_10.md` for details.
 
-- Feature 22 | avoid try/catch for import ThemedStyle from ttkthemes
-  Treat this package at the same level of other packages, mandatory.
-  It will simplify the code, not having "possible" set_theme, but having it for sure.
-
 - Fix 23 | ttk.Button require A Image or str for image property, not a PhotoImage | None 
+
+- Fix 24 [DEPEND from Feature 17] | The text in the options of "File Names" secion are truncated. 
+  Hopefully with the Feature 17 this will be solved. 
 
 ## Done (last 20 teaks)
 
+- Feature 22 | avoid try/catch for import ThemedStyle from ttkthemes
 - Feature 21: extracted all hardcoded colors and theme constants from `src/ui.py` into a dedicated `src/theme.py` module (theme names, status bar backgrounds, SPLIT button colors, message colors, file label color) with a `status_bg()` helper; `ui.py` now imports from there.
 - Feature 15: UI dark mode follows Windows system theme at startup — replaced broken ctypes-based detection (missing import caused NameError) with winreg query of `AppsUseLightTheme`; returns False gracefully on non-Windows or registry errors.
 - Bug 18: status bar under the SPLIT button now follows the active theme instead of staying a fixed light-grey panel in dark mode.
