@@ -227,8 +227,9 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     main_frame = ttk.Frame(root, padding="20")
     main_frame.pack(fill=tk.BOTH, expand=True)
     main_frame.grid_columnconfigure(0, weight=1)
+    main_frame.grid_columnconfigure(1, weight=0)
 
-    # Title label
+    # Title label spans full width; dark mode button aligned right in same cell
     title_label = ttk.Label(main_frame, text="Music Splitter", font=("Arial", 16, "bold"))
     title_label.grid(row=0, column=0, sticky=tk.W, pady=(0, pad))
 
@@ -248,7 +249,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     dark_check.grid(row=0, column=1, sticky=tk.E)
     # Browse row: button + selected file name
     browse_frame = ttk.Frame(main_frame)
-    browse_frame.grid(row=1, column=0, sticky="we", pady=(0, pad))
+    browse_frame.grid(row=1, column=0, columnspan=2, sticky="we", pady=(0, pad))
 
     browse_img = _button_image(root, BROWSE_ICON)
     if browse_img is not None:
@@ -264,7 +265,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     # File names format selector
     naming_frame = ttk.LabelFrame(main_frame, text="File names", padding="10")
-    naming_frame.grid(row=2, column=0, sticky="we", pady=(0, pad))
+    naming_frame.grid(row=2, column=0, columnspan=2, sticky="we", pady=(0, pad))
 
     naming_var = tk.StringVar(value=filename_format)
     ttk.Radiobutton(
@@ -279,7 +280,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     # Part length selection (minutes: 5 / 10 / 15)
     part_len_var = tk.StringVar(value=str(initial_part_length_m))
     part_len_frame = ttk.LabelFrame(main_frame, text="Part length", padding="10")
-    part_len_frame.grid(row=3, column=0, sticky="we", pady=(0, pad))
+    part_len_frame.grid(row=3, column=0, columnspan=2, sticky="we", pady=(0, pad))
 
     for minutes in ("5", "10", "15"):
         ttk.Radiobutton(
@@ -294,11 +295,11 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     split_button = _create_ttk_button(main_frame, text="SPLIT", command=split_file,
                                        image=split_img, compound=tk.LEFT,
                                        style="Big.TButton", state=tk.DISABLED)
-    split_button.grid(row=4, column=0, sticky="we", pady=(pad, 0))
+    split_button.grid(row=4, column=0, columnspan=2, sticky="we", pady=(pad, 0))
 
     # Status area: fixed height directly below the Split button
     status_bar = ttk.Frame(main_frame, style="Status.TFrame", height=28)
-    status_bar.grid(row=5, column=0, sticky="we", pady=(pad_xs, 0))
+    status_bar.grid(row=5, column=0, columnspan=2, sticky="we", pady=(pad_xs, 0))
     status_bar.pack_propagate(False)
     status_var = tk.StringVar(value="")
     status_label = ttk.Label(status_bar, textvariable=status_var, anchor=tk.W)
@@ -322,7 +323,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     def set_log_button_visible(visible):
         if visible:
-            log_button.grid(row=6, column=0, sticky="we", pady=(pad, 0))
+            log_button.grid(row=6, column=0, columnspan=2, sticky="we", pady=(pad, 0))
         else:
             log_button.grid_remove()
 
