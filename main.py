@@ -1,4 +1,3 @@
-import logging
 import os
 import threading
 import tkinter as tk
@@ -8,7 +7,7 @@ from src.logging import log_error, log_info, setup_logger
 from src.ui import create_main_window
 from src.splitter import MP3Splitter
 
-# Settings live next to the log file in a per-user writable location;
+# Settings live in a per-user writable location;
 # the install dir (Program Files) is read-only for regular users.
 SETTINGS_FILE = str(get_data_dir() / "settings.txt")
 
