@@ -14,8 +14,6 @@
 
 - Feature 10 (investigation/POC): Smart segment post-processing — merge short (<5min), split long (>15min) segments after fixed-duration split. Optional onset-snap refinement. See `Feature_10.md` for details.
 
-- Bug 23 | ttk.Button require A Image or str for image property, not a PhotoImage | None 
-
 - Feature 25 | Cleanup README
   Do we really depend from FFMPEG ?
   Are all the information updated ?
