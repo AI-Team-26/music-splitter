@@ -2,7 +2,7 @@
 
 ## Backlog
 
-- Feature 16 | Dark mode should not be an on/off option 
+- Feature 16 | Dark mode should not be a checkbox
   Icon-Only Switch: Replace the checkbox with a moon/sun icon toggle button in the top-right. 
   This saves horizontal space and looks much cleaner.
 
@@ -15,9 +15,6 @@
 - Feature 10 (investigation/POC): Smart segment post-processing — merge short (<5min), split long (>15min) segments after fixed-duration split. Optional onset-snap refinement. See `Feature_10.md` for details.
 
 - Bug 23 | ttk.Button require A Image or str for image property, not a PhotoImage | None 
-
-- Bug 24 [DEPEND from Feature 17] | The text in the options of "File Names" secion are truncated. 
-  Hopefully with the Feature 17 this will be solved. 
 
 - Feature 25 | Cleanup README
   Do we really depend from FFMPEG ?
