@@ -97,6 +97,23 @@ def _save_theme_pref(dark):
         log_error("Failed to save theme preference (%s).", err)
 
 
+def _create_ttk_button(parent, text, command, image=None, compound=None, style=None, state=None):
+    """Create ttk.Button safely: only pass image when it is not None."""
+    kwargs = {"text": text, "command": command}
+    if image is not None:
+        kwargs["image"] = image
+    if compound is not None:
+        kwargs["compound"] = compound
+    if style is not None:
+        kwargs["style"] = style
+    if state is not None:
+        kwargs["state"] = state
+    return ttk.Button(parent, **kwargs)
+
+
+# TODO: consider extending _create_ttk_button for other widgets if duplication grows.
+
+
 def _button_image(root, path):
     """Load button icon via Pillow; None if unavailable or missing."""
     try:
@@ -236,8 +253,8 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     browse_img = _button_image(root, BROWSE_ICON)
     if browse_img is not None:
         root._browse_img = browse_img  # keep a reference so Tk doesn't free it
-    browse_button = ttk.Button(browse_frame, text="Browse...", command=browse_file,
-                               image=browse_img, compound=tk.LEFT)
+    browse_button = _create_ttk_button(browse_frame, text="Browse...", command=browse_file,
+                                        image=browse_img, compound=tk.LEFT)
     browse_button.pack(side=tk.LEFT)
 
     file_var = tk.StringVar(value="No file selected")
@@ -274,9 +291,9 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     split_img = _button_image(root, SPLIT_ICON)
     if split_img is not None:
         root._split_img = split_img
-    split_button = ttk.Button(main_frame, text="SPLIT", style="Big.TButton",
-                              state=tk.DISABLED, command=split_file,
-                              image=split_img, compound=tk.LEFT)
+    split_button = _create_ttk_button(main_frame, text="SPLIT", command=split_file,
+                                       image=split_img, compound=tk.LEFT,
+                                       style="Big.TButton", state=tk.DISABLED)
     split_button.grid(row=4, column=0, sticky="we", pady=(pad, 0))
 
     # Status area: fixed height directly below the Split button
