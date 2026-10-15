@@ -113,7 +113,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     Theme priority: saved user preference > Windows system theme.
     If no explicit preference exists, follow the OS setting.
     """
-       
+
     style = ThemedStyle(root)
 
     pref = _load_theme_pref()
@@ -127,8 +127,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
               background=[("disabled", BIG_BUTTON_DISABLED_BG)],
               foreground=[("disabled", BIG_BUTTON_DISABLED_FG)])
     # ttk.Frame has no -background option here, so theme it through the Style.
-    style.configure("Status.TFrame",
-                    background=status_bg(is_dark_mode))
+    style.configure("Status.TFrame", background=status_bg(is_dark_mode))
 
     root.title("Music Splitter")
     root.geometry("520x400")
@@ -150,8 +149,8 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
         style.configure("Status.TFrame",
                         background=status_bg(dark))
         _save_theme_pref(dark)
-    dark_check = ttk.Checkbutton(main_frame, text="Dark Mode",
-                                    variable=is_dark_mode_var, command=toggle_theme)
+
+    dark_check = ttk.Checkbutton(main_frame, text="Dark Mode", variable=is_dark_mode_var, command=toggle_theme)
     dark_check.grid(row=0, column=1, sticky=tk.E)
     
     # Browse row: button + selected file name
