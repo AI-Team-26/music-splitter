@@ -1,4 +1,3 @@
-import logging
 import os
 import math
 import shutil
@@ -6,35 +5,9 @@ import subprocess
 import sys
 from pathlib import Path
 import yaml
-from platformdirs import user_data_dir
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, ID3NoHeaderError, COMM, TRK
-
-# Shared logger name and log path so UI and library write to one place.
-LOGGER_NAME = "music_splitter"
-
-
-def get_data_dir() -> Path:
-    """Per-user writable directory for runtime data (log, settings).
-
-    Installed apps live in Program Files which is read-only for regular
-    users, so all mutable files must go elsewhere (platformdirs picks the
-    per-OS convention, e.g. %APPDATA%\MusicSplitter on Windows).
-    """
-    base = Path(user_data_dir(appname="Music Splitter", appauthor=False))
-    base.mkdir(parents=True, exist_ok=True)
-    return base
-
-
-LOG_FILE = str(get_data_dir() / "music_splitter.log")
-
-
-def get_logger(name=LOGGER_NAME):
-    """Return the shared application logger."""
-    return logging.getLogger(name)
-
-
-logger = get_logger()
+from src.logging import log_warning
 
 
 def resource_path(relative: str) -> Path:
@@ -48,7 +21,7 @@ def resource_path(relative: str) -> Path:
     base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent))
     path = base / relative
     if not path.exists():
-        logger.warning(f"Resource file not found at {path}")
+        log_warning(f"Resource file not found at {path}")
     return path
 
 
@@ -70,16 +43,16 @@ def load_provenance(path: Path = UI_TEXT_FILE) -> dict:
     try:
         raw = Path(path).read_text(encoding="utf-8")
     except OSError as e:
-        logger.warning(f"Could not read {path} ({e}); using built-in provenance text.")
+        log_warning(f"Could not read {path} ({e}); using built-in provenance text.")
         return dict(DEFAULT_PROVENANCE)
     try:
         data = yaml.safe_load(raw) or {}
     except yaml.YAMLError as e:
-        logger.warning(f"Invalid YAML in {path}: {e}; using built-in provenance text.")
+        log_warning(f"Invalid YAML in {path}: {e}; using built-in provenance text.")
         return dict(DEFAULT_PROVENANCE)
     comm = data.get("comm")
     if not isinstance(comm, dict) or not isinstance(comm.get("text"), str) or not comm["text"].strip():
-        logger.warning(f"Missing or invalid 'comm' section in {path}; using built-in provenance text.")
+        log_warning(f"Missing or invalid 'comm' section in {path}; using built-in provenance text.")
         return dict(DEFAULT_PROVENANCE)
     return {
         "lang": str(comm.get("language") or DEFAULT_PROVENANCE["lang"]),
@@ -218,7 +191,7 @@ class MP3Splitter:
                         ))
                     target_tags.save()
                 except Exception as e:
-                    logger.warning(f"Could not copy metadata to {filename}: {e}")
+                    log_warning(f"Could not copy metadata to {filename}: {e}")
 
                 created_files.append(output_path)
 

@@ -1,20 +1,21 @@
 import json
 import os
-import threading
 import tkinter as tk
 from tkinter import ttk
 
-from src.splitter import LOG_FILE, get_data_dir, get_logger, resource_path
+from src import get_data_dir
+from src.logging import log_error, log_warning, read_logs
+from src.splitter import resource_path
 from src.theme import (
     BIG_BUTTON_BG,
     BIG_BUTTON_DISABLED_BG,
     BIG_BUTTON_DISABLED_FG,
     BIG_BUTTON_FG,
-    DARK_STATUS_BG,
-    DARK_THEME,
-    FILE_LABEL_DEFAULT_FG,
-    LIGHT_STATUS_BG,
     LIGHT_THEME,
+    LIGHT_STATUS_BG,
+    DARK_THEME,
+    DARK_STATUS_BG,    
+    FILE_LABEL_DEFAULT_FG,   
     MSG_ERROR,
     MSG_SUCCESS,
     status_bg,
@@ -61,7 +62,7 @@ def is_system_theme_dark() -> bool:
             value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
             return value == 0  # 0 = dark, 1 = light
     except Exception as err:
-        get_logger().warning(
+        log_warning(
             "Could not read Windows system theme (%s); defaulting to light.", err
         )
         return False
@@ -75,7 +76,7 @@ def _load_theme_pref():
             if "dark_mode" in data:
                 return bool(data["dark_mode"])
     except (OSError, ValueError) as err:
-        get_logger().warning("Could not read theme config (%s); using default.", err)
+        log_warning("Could not read theme config (%s); using default.", err)
     return None
 
 
@@ -85,13 +86,13 @@ def _save_theme_pref(dark):
         with open(CONFIG_FILE, encoding="utf-8") as f:
             data = json.load(f)
     except (OSError, ValueError) as err:
-        get_logger().warning("Could not read existing config before saving (%s).", err)
+        log_warning("Could not read existing config before saving (%s).", err)
     data["dark_mode"] = dark
     try:
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f)
     except OSError as err:
-        get_logger().error("Failed to save theme preference (%s).", err)
+        log_error("Failed to save theme preference (%s).", err)
 
 
 def _button_image(root, path):
@@ -225,13 +226,8 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
         text.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         text.pack(fill=tk.BOTH, expand=True)
-        content = ""
-        try:
-            with open(LOG_FILE, encoding="utf-8") as f:
-                content = f.read()
-        except OSError:
-            pass
-        text.insert(tk.END, content or "(no log available yet)")
+        logs = read_logs()
+        text.insert(tk.END, logs or "(no log available yet)")
         text.config(state=tk.DISABLED)
 
     log_button = ttk.Button(main_frame, text="Show log...", command=show_log_viewer)

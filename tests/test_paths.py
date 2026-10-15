@@ -1,7 +1,8 @@
 import unittest
 from pathlib import Path
 
-from src.splitter import LOG_FILE, get_data_dir
+from src import get_data_dir
+from src.logging import LOG_FILE
 
 
 class TestRuntimeDataPaths(unittest.TestCase):

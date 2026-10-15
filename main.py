@@ -1,30 +1,15 @@
-import logging
 import os
 import threading
 import tkinter as tk
 from tkinter import filedialog
+from src import get_data_dir
+from src.logging import log_error, log_info, setup_logger
 from src.ui import create_main_window
-from src.splitter import MP3Splitter, LOG_FILE, get_data_dir, get_logger
+from src.splitter import MP3Splitter
 
-# Settings live next to the log file in a per-user writable location;
+# Settings live in a per-user writable location;
 # the install dir (Program Files) is read-only for regular users.
 SETTINGS_FILE = str(get_data_dir() / "settings.txt")
-logger = get_logger()
-
-
-def setup_logging():
-    """Point the shared 'music_splitter' logger at LOG_FILE (append mode).
-
-    Safe to call repeatedly: handlers are replaced, never stacked.
-    """
-    handler = logging.FileHandler(LOG_FILE, encoding="utf-8")
-    handler.setFormatter(logging.Formatter(
-        "[%(asctime)s] %(levelname)s %(message)s",
-        datefmt="%Y-%m-%dT%H:%M:%S",
-    ))
-    logger.handlers = [handler]
-    logger.setLevel(logging.INFO)
-    logger.propagate = False
 
 
 def read_settings():
@@ -62,10 +47,12 @@ def load_last_dir():
 
 class MusicSplitterApp:
     def __init__(self):
+
+        setup_logger()
+
         self.root = tk.Tk()
         self.last_selected_file = ""
         self.last_dir = load_last_dir()
-        setup_logging()
 
         # Load settings from settings.txt
         self.config = read_settings()
@@ -83,12 +70,9 @@ class MusicSplitterApp:
             initial_part_length_m=self.part_length_m,
         )
 
-    def log_message(self, msg, level=logging.INFO):
-        logger.log(level, msg)
-
     def select_file(self, extension):
         if not extension:
-            self.log_message("Error: No extension provided.")
+            log_info("Error: No extension provided.")
             return None
 
         initial_dir = self.last_dir or "."
@@ -105,9 +89,9 @@ class MusicSplitterApp:
             self.last_dir = os.path.dirname(filename)
             save_setting("LAST_DIR", self.last_dir)
             self.update_file_label(filename)
-            self.log_message(f"File selected: {os.path.basename(filename)}")
+            log_info(f"File selected: {os.path.basename(filename)}")
         else:
-            self.log_message("File selection cancelled.")
+            log_info("File selection cancelled.")
 
         return filename
 
@@ -127,7 +111,7 @@ class MusicSplitterApp:
 
         self.set_enabled(False)
         self.set_message(f"Splitting {os.path.basename(mp3_file)}…")
-        self.log_message(f"Starting split process for: {os.path.basename(mp3_file)}")
+        log_info(f"Starting split process for: {os.path.basename(mp3_file)}")
 
         threading.Thread(target=self._run_split, args=(mp3_file, naming, part_length_m), daemon=True).start()
 
@@ -139,10 +123,10 @@ class MusicSplitterApp:
                 mp3_file, output_folder, part_length_m, naming=naming,
             )
             result = (len(created_files), None)
-            self.log_message(f"Split complete: {len(created_files)} segments created in {output_folder}")
+            log_info(f"Split complete: {len(created_files)} segments created in {output_folder}")
         except Exception as e:
             result = (None, str(e))
-            self.log_message(f"Error during split: {e}", logging.ERROR)
+            log_error(f"Error during split: {e}")
 
         # Persist settings and update the UI from the main thread only
         self.root.after(0, lambda: self._on_split_done(naming, part_length_m, *result))
