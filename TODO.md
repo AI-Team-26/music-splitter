@@ -22,6 +22,10 @@
 - Bug 24 [DEPEND from Feature 17] | The text in the options of "File Names" secion are truncated. 
   Hopefully with the Feature 17 this will be solved. 
 
+- Feature 25 | Cleanup README
+  Do we really depend from FFMPEG ?
+  Are all the information updated?
+
 ## Done (last 20 tasks)
 
 - Bug 20: window frame follows active theme
