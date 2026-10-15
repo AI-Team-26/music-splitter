@@ -101,7 +101,7 @@ def _button_image(root, path):
     """Load button icon via Pillow; None if unavailable or missing."""
     try:
         from PIL import Image, ImageTk
-        img = Image.open(path).resize((16, 16))
+        img = Image.open(path).resize((24, 24))
         return ImageTk.PhotoImage(img, master=root)
     except Exception:
         return None
