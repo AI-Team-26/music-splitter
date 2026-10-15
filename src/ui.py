@@ -152,7 +152,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     dark_check = ttk.Checkbutton(main_frame, text="Dark Mode", variable=is_dark_mode_var, command=toggle_theme)
     dark_check.grid(row=0, column=1, sticky=tk.E)
-    
+
     # Browse row: button + selected file name
     browse_frame = ttk.Frame(main_frame)
     browse_frame.grid(row=1, column=0, sticky="we", pady=(0, pad))
