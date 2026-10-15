@@ -24,8 +24,8 @@ def read_logs():
 def log_info(msg):
     logger.info(msg)
 
-def log_warning(msg):
-    logger.warning(msg)
+def log_warning(msg, *args):
+    logger.warning(msg, *args)
 
-def log_error(msg):
-    logger.error(msg)
+def log_error(msg, *args):
+    logger.error(msg, *args)
