@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import tkinter as tk
 from tkinter import ttk
 from ttkthemes import ThemedStyle
@@ -106,6 +107,29 @@ def _button_image(root, path):
         return None
 
 
+def set_titlebar_dark(root, dark):
+    """Ask Windows to draw the title bar in dark or light mode (no-op elsewhere)."""
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+        root.update_idletasks()  # make sure the native window exists
+        user32 = ctypes.windll.user32
+        hwnd = user32.GetParent(root.winfo_id()) or root.winfo_id()
+        value = ctypes.c_int(1 if dark else 0)
+        # Attribute 20 on Win10 20H1+/Win11; 19 on older Win10 builds.
+        for attr in (20, 19):
+            if ctypes.windll.dwmapi.DwmSetWindowAttribute(
+                hwnd, attr, ctypes.byref(value), ctypes.sizeof(value)
+            ) == 0:
+                break
+        # Force the non-client area (title bar) to repaint.
+        # SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED = 0x27
+        user32.SetWindowPos(hwnd, 0, 0, 0, 0, 0, 0x27)
+    except Exception as err:
+        log_warning("Could not set title bar theme (%s).", err)
+
+
 def create_main_window(root, browse_file, split_file, filename_format="numbers",
                        initial_part_length_m=10):
     """Create and configure the main application window.
@@ -138,6 +162,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     else:
         root.config(background=LIGHT_STATUS_BG)
     apply_window_icon(root)
+    set_titlebar_dark(root, is_dark_mode)
 
     main_frame = ttk.Frame(root, padding="20")
     main_frame.pack(fill=tk.BOTH, expand=True)
@@ -156,6 +181,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
         root.config(background=DARK_STATUS_BG if dark else LIGHT_STATUS_BG)
         style.configure("Status.TFrame",
                         background=status_bg(dark))
+        set_titlebar_dark(root, dark)
         _save_theme_pref(dark)
 
     dark_check = ttk.Checkbutton(main_frame, text="Dark Mode", variable=is_dark_mode_var, command=toggle_theme)
