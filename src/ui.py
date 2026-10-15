@@ -111,9 +111,6 @@ def _create_ttk_button(parent, text, command, image=None, compound=None, style=N
     return ttk.Button(parent, **kwargs)
 
 
-# TODO: consider extending _create_ttk_button for other widgets if duplication grows.
-
-
 def _button_image(root, path):
     """Load button icon via Pillow; None if unavailable or missing."""
     try:
@@ -229,7 +226,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     main_frame.grid_columnconfigure(0, weight=1)
     main_frame.grid_columnconfigure(1, weight=0)
 
-    # Title label spans full width; dark mode button aligned right in same cell
+    # Title label
     title_label = ttk.Label(main_frame, text="Music Splitter", font=("Arial", 16, "bold"))
     title_label.grid(row=0, column=0, sticky=tk.W, pady=(0, pad))
 
