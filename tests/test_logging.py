@@ -13,6 +13,8 @@ class TestLogging(unittest.TestCase):
         self.some_dir = os.path.join(self.tmpdir.name, "music")
         os.makedirs(self.some_dir)
 
+        src.logging.setup_logger()
+
     def tearDown(self):
         src.logging.LOG_FILE = self.original_log_file
 

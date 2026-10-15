@@ -4,7 +4,7 @@ import threading
 import tkinter as tk
 from tkinter import filedialog
 from src import get_data_dir
-from src.logging import log_error, log_info
+from src.logging import log_error, log_info, setup_logger
 from src.ui import create_main_window
 from src.splitter import MP3Splitter
 
@@ -48,6 +48,9 @@ def load_last_dir():
 
 class MusicSplitterApp:
     def __init__(self):
+
+        setup_logger()
+
         self.root = tk.Tk()
         self.last_selected_file = ""
         self.last_dir = load_last_dir()
