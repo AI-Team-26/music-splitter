@@ -24,7 +24,7 @@
 
 ## Done (last 20 tasks)
 
-- Bug 20: window frame now follows active theme — root background set explicitly at startup and refreshed on theme toggle
+- Bug 20: window frame follows active theme
 
 - Feature 22 | avoid try/catch for import ThemedStyle from ttkthemes
 - Feature 21: extracted all hardcoded colors and theme constants from `src/ui.py` into a dedicated `src/theme.py` module (theme names, status bar backgrounds, SPLIT button colors, message colors, file label color) with a `status_bg()` helper; `ui.py` now imports from there.

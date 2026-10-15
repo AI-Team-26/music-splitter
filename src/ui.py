@@ -130,7 +130,7 @@ def _force_titlebar_repaint(user32, hwnd, root):
         root.update_idletasks()
 
 
-def set_titlebar_dark(root, dark):
+def set_title_bar_theme(root, dark):
     """Ask Windows to draw the title bar in dark or light mode (no-op elsewhere)."""
     if sys.platform != "win32":
         return
@@ -197,6 +197,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     root.title("Music Splitter")
     root.geometry("520x400")
+    root.minsize(520, 400)
     # Ensure the root window itself adopts the current theme's background.
     # This fixes the issue where the window frame stayed light in dark mode.
     if is_dark_mode:
@@ -204,7 +205,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     else:
         root.config(background=LIGHT_STATUS_BG)
     apply_window_icon(root)
-    set_titlebar_dark(root, is_dark_mode)
+    set_title_bar_theme(root, is_dark_mode)
 
     main_frame = ttk.Frame(root, padding="20")
     main_frame.pack(fill=tk.BOTH, expand=True)
@@ -223,7 +224,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
         root.config(background=DARK_STATUS_BG if dark else LIGHT_STATUS_BG)
         style.configure("Status.TFrame",
                         background=status_bg(dark))
-        set_titlebar_dark(root, dark)
+        set_title_bar_theme(root, dark)
         _save_theme_pref(dark)
 
     dark_check = ttk.Checkbutton(main_frame, text="Dark Mode", variable=is_dark_mode_var, command=toggle_theme)
