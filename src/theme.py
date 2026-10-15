@@ -11,7 +11,7 @@ DARK_STATUS_BG = "#464646"    # equilux frame surface (-bg)
 # SPLIT button (Big.TButton)
 BIG_BUTTON_BG = "#4CAF50"
 BIG_BUTTON_FG = "white"
-BIG_BUTTON_DISABLED_BG = "#a5d6a7"
+BIG_BUTTON_DISABLED_BG = "#a0a0a0"
 BIG_BUTTON_DISABLED_FG = "gray"
 
 # Status message colors

@@ -24,7 +24,8 @@
 
 - Feature 25 | Cleanup README
   Do we really depend from FFMPEG ?
-  Are all the information updated?
+  Are all the information updated ?
+  Add a link to the (latest) Release
 
 ## Done (last 20 tasks)
 
