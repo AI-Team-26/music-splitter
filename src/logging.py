@@ -6,6 +6,12 @@ LOG_FILE = str(get_data_dir() / "music_splitter.log")
 _logger = logging.getLogger("music_splitter")
 
 def setup_logger():
+    # Close any previous handlers so their log files are not left open
+    # (e.g. when tests re-point the logger at a temp directory).
+    for old in list(_logger.handlers):
+        old.close()
+        _logger.removeHandler(old)
+
     handler = logging.FileHandler(LOG_FILE, encoding="utf-8")
     handler.setFormatter(logging.Formatter(
         "[%(asctime)s] %(levelname)s %(message)s",
