@@ -2,9 +2,6 @@
 
 ## Backlog
 
-- Feature 17 | The light/dark mode button  seems to stay on a separate column.
-  The main controls should extends across the full width of the window.  
-
 - Feature 16 | Dark mode should not be an on/off option 
   Icon-Only Switch: Replace the checkbox with a moon/sun icon toggle button in the top-right. 
   This saves horizontal space and looks much cleaner.
@@ -28,6 +25,8 @@
   Add a link to the (latest) Release
 
 ## Done (last 20 tasks)
+
+- Feature 17 | Main controls span full width; dark mode button right-aligned
 
 - Bug 20: window frame follows active theme
 
