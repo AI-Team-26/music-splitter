@@ -10,9 +10,11 @@ DARK_STATUS_BG = "#464646"    # equilux frame surface (-bg)
 
 # SPLIT button (Big.TButton)
 BIG_BUTTON_BG = "#4CAF50"
-BIG_BUTTON_FG = "white"
+BIG_BUTTON_FG = "#fcfcfc"
 BIG_BUTTON_DISABLED_BG = "#a0a0a0"
 BIG_BUTTON_DISABLED_FG = "gray"
+
+# "btn_face": "#005a5a",   dark mode button enabled
 
 # Per-widget palettes keyed by mode. Tuned so buttons read as raised against
 # the frame surface and label text keeps enough contrast in both themes.
@@ -29,13 +31,13 @@ _PALETTES = {
     },
     True: {   # dark (equilux)
         "text": "#f2f2f2",
-        "btn_face": "#5a5a5a",
-        "btn_light_edge": "#7d7d7d",
-        "btn_dark_edge": "#2e2e2e",
+        "btn_face": "#4a4a4a",
+        "btn_light_edge": "#005d5d", ## no changes !
+        "btn_dark_edge": "#3e3e3e",
         "btn_border": "#242424",
         "file_hint": "#bdbdbd",
-        "msg_error": "#ff6b6b",
-        "msg_success": "#7ee08a",
+        "msg_error": "#f74848",
+        "msg_success": "#62ee72",
     },
 }
 
