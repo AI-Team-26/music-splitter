@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-10-16
+- Bug 15: improved dark mode.
+
 ## 2026-10-15
 - Feature 22: `ttkthemes` is now a hard dependency — removed the try/catch fallback around the `ThemedStyle` import in `src/ui.py`. The module imports it at top level and always applies the themed style; the old "ttkthemes not installed" status-bar warning and the unthemed code paths are gone. Environments without the package now fail at startup with an `ImportError` instead of running unthemed.
 
