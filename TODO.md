@@ -6,7 +6,7 @@
   Icon-Only Switch: Replace the checkbox with a moon/sun icon toggle button in the top-right. 
   This saves horizontal space and looks much cleaner.
 
-- Feature 8 (low priority): Windows installer variant that **bundles FFmpeg** (follow-up of Feature 6)
+- Feature 26 (low priority): Windows installer variant that **bundles FFmpeg** (follow-up of Feature 6)
   Bundle a static `ffmpeg.exe` next to the app exe so users without FFmpeg get a self-contained install.
   Resolution order: bundled copy next to exe → system PATH → error.
 
