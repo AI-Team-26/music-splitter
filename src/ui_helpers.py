@@ -3,6 +3,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+from src.logging import log_warning
+
 
 def create_ttk_button(parent, text, command, image=None, compound=None, style=None, state=None):
     """Create ttk.Button safely: only pass image when it is not None."""
@@ -18,13 +20,28 @@ def create_ttk_button(parent, text, command, image=None, compound=None, style=No
     return ttk.Button(parent, **kwargs)
 
 
-def button_image(root, path):
-    """Load button icon via Pillow; None if unavailable or missing."""
+_DEFAULT_ICON_SIZE = (24, 24)
+
+
+def button_image(root, path, size="default"):
+    """Load button icon via Pillow; None if unavailable or missing.
+
+    size: "default" (24x24), an int for a square, or a (width, height) tuple.
+    """
     try:
         from PIL import Image, ImageTk
-        img = Image.open(path).resize((24, 24))
+        if size == "default":
+            dims = _DEFAULT_ICON_SIZE
+        elif isinstance(size, int):
+            dims = (size, size)
+        else:
+            dims = tuple(size)
+        img = Image.open(path).resize(dims)
         return ImageTk.PhotoImage(img, master=root)
-    except Exception:
+    except Exception as err:
+        # Missing Pillow/asset must degrade gracefully (text-only button),
+        # but stay visible in the log instead of failing silently.
+        log_warning("Could not load icon %s (%s); continuing without image.", path, err)
         return None
 
 

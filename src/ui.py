@@ -193,7 +193,7 @@ def _apply_widget_styles(style, is_dark):
     )
     style.configure(
         "TButton",
-        font=("Arial", 10), padding=8, borderwidth=2,
+        font=("Arial", 10), padding=6, borderwidth=2,
         background=p["btn_face"], foreground=p["text"],
         lightcolor=p["btn_light_edge"], darkcolor=p["btn_dark_edge"],
         bordercolor=p["btn_border"], relief="raised",
@@ -201,7 +201,7 @@ def _apply_widget_styles(style, is_dark):
     # Inverted bevel: reads as pressed/selected for the active theme button.
     style.configure(
         "ThemeActive.TButton",
-        font=("Arial", 10), padding=8, borderwidth=2,
+        font=("Arial", 10), padding=6, borderwidth=2,
         background=p["btn_dark_edge"], foreground=p["text"],
         lightcolor=p["btn_border"], darkcolor=p["btn_light_edge"],
         bordercolor=p["btn_border"], relief="sunken",
