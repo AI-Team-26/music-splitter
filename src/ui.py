@@ -29,6 +29,8 @@ ICON_ICO = resource_path("assets/icon.ico")
 ICON_PNG = resource_path("assets/icon.png")
 BROWSE_ICON = resource_path("assets/browse_icon.png")
 SPLIT_ICON = resource_path("assets/split_icon.png")
+MOON_ICON = resource_path("assets/moon_icon.png")
+SUN_ICON = resource_path("assets/sun_icon.png")
 
 CONFIG_FILE = str(get_data_dir() / "config.json")
 
@@ -118,41 +120,6 @@ def _button_image(root, path):
     except Exception:
         return None
 
-
-def _draw_moon_icon(root):
-    """Draw a crescent-moon PhotoImage (shown while in light mode)."""
-    try:
-        from PIL import Image, ImageDraw, ImageTk
-        size = 20
-        img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-        d = ImageDraw.Draw(img)
-        color = (90, 100, 115, 255)   # slate grey, readable on plastik surface
-        d.ellipse((3, 3, 17, 17), fill=color)
-        d.ellipse((8, 1, 21, 14), fill=(0, 0, 0, 0))  # bite out the crescent
-        return ImageTk.PhotoImage(img, master=root)
-    except Exception:
-        return None
-
-
-def _draw_sun_icon(root):
-    """Draw a sun PhotoImage (shown while in dark mode)."""
-    try:
-        import math
-        from PIL import Image, ImageDraw, ImageTk
-        size = 20
-        img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-        d = ImageDraw.Draw(img)
-        gold = (255, 213, 79, 255)
-        cx = cy = 10
-        d.ellipse((cx - 5, cy - 5, cx + 5, cy + 5), fill=gold)
-        for angle in range(0, 360, 45):
-            rad = math.radians(angle)
-            x1, y1 = cx + 7 * math.cos(rad), cy + 7 * math.sin(rad)
-            x2, y2 = cx + 9 * math.cos(rad), cy + 9 * math.sin(rad)
-            d.line((x1, y1, x2, y2), fill=gold, width=2)
-        return ImageTk.PhotoImage(img, master=root)
-    except Exception:
-        return None
 
 
 # Flip to True if WM_NCACTIVATE alone doesn't force the frame recompute on
@@ -308,7 +275,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     # Icon-only theme toggle: moon invites switching to dark, sun back to light.
     # Both images are kept on root so Tk never frees them mid-session.
-    theme_icons = {False: _draw_moon_icon(root), True: _draw_sun_icon(root)}
+    theme_icons = {False: _button_image(root, MOON_ICON), True: _button_image(root, SUN_ICON)}
     root._theme_icons = theme_icons
 
     def toggle_theme():
