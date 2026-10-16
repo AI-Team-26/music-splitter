@@ -36,9 +36,9 @@ def button_image(root, path, size="default"):
         pixels = _ICON_SIZES[size] if isinstance(size, str) else size
         img = Image.open(path).resize((pixels, pixels))
         return ImageTk.PhotoImage(img, master=root)
-    except Exception as err:
-        # Missing Pillow/asset must degrade gracefully (text-only button),
-        # but stay visible in the log instead of failing silently.
+    except (ImportError, OSError, ValueError, TypeError, KeyError) as err:
+        # Missing Pillow/asset/bad size must degrade gracefully (text-only
+        # button), but stay visible in the log instead of failing silently.
         log_warning("Could not load icon %s (%s); continuing without image.", path, err)
         return None
 
