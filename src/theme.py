@@ -14,8 +14,6 @@ BIG_BUTTON_FG = "#fcfcfc"
 BIG_BUTTON_DISABLED_BG = "#a0a0a0"
 BIG_BUTTON_DISABLED_FG = "gray"
 
-# "btn_face": "#005a5a",   dark mode button enabled
-
 # Per-widget palettes keyed by mode. Tuned so buttons read as raised against
 # the frame surface and label text keeps enough contrast in both themes.
 _PALETTES = {
