@@ -17,10 +17,8 @@ from src.theme import (
     LIGHT_STATUS_BG,
     DARK_THEME,
     DARK_STATUS_BG,
-    FILE_LABEL_DEFAULT_FG,
-    MSG_ERROR,
-    MSG_SUCCESS,
     status_bg,
+    widget_palette,
 )
 
 pad = 10
@@ -186,6 +184,25 @@ def set_title_bar_theme(root, dark):
         log_warning("Could not set title bar theme (%s).", err)
 
 
+def _apply_widget_styles(style, is_dark):
+    """Apply per-mode colors so buttons read as raised and text keeps contrast.
+
+    The base ttk themes are flat by default, leaving button faces close to the
+    frame surface with a barely visible bevel; explicit face + edge colors fix it.
+    """
+    p = widget_palette(is_dark)
+    style.configure(
+        "TButton",
+        font=("Arial", 10), padding=8,
+        background=p["btn_face"], foreground=p["text"],
+        lightcolor=p["btn_light_edge"], darkcolor=p["btn_dark_edge"],
+        bordercolor=p["btn_border"], relief="raised",
+    )
+    for name in ("TLabel", "TRadiobutton", "TCheckbutton"):
+        style.configure(name, foreground=p["text"])
+    style.configure("TLabelframe.Label", foreground=p["text"])
+
+
 def create_main_window(root, browse_file, split_file, filename_format="numbers",
                        initial_part_length_m=10):
     """Create and configure the main application window.
@@ -200,7 +217,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     is_dark_mode = pref if pref is not None else is_system_theme_dark()
     style.set_theme(DARK_THEME if is_dark_mode else LIGHT_THEME)
 
-    style.configure("TButton", font=("Arial", 10), padding=10)
+    _apply_widget_styles(style, is_dark_mode)
     style.configure("Big.TButton", font=("Arial", 14, "bold"),
                     background=BIG_BUTTON_BG, foreground=BIG_BUTTON_FG)
     style.map("Big.TButton",
@@ -235,10 +252,13 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
     def toggle_theme():
         dark = is_dark_mode_var.get()
         style.set_theme(DARK_THEME if dark else LIGHT_THEME)
+        _apply_widget_styles(style, dark)
         # Refresh the root window background to match the new theme.
         root.config(background=DARK_STATUS_BG if dark else LIGHT_STATUS_BG)
         style.configure("Status.TFrame",
                         background=status_bg(dark))
+        if file_var.get() == "No file selected":
+            file_label.config(foreground=widget_palette(dark)["file_hint"])
         set_title_bar_theme(root, dark)
         _save_theme_pref(dark)
 
@@ -257,7 +277,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     file_var = tk.StringVar(value="No file selected")
     file_label = ttk.Label(browse_frame, textvariable=file_var,
-                           foreground=FILE_LABEL_DEFAULT_FG)
+                           foreground=widget_palette(is_dark_mode)["file_hint"])
     file_label.pack(side=tk.LEFT, padx=(pad_xs * 2, 0))
 
     # File names format selector
@@ -330,13 +350,14 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
             file_label.config(foreground="")
         else:
             file_var.set("No file selected")
-            file_label.config(foreground=FILE_LABEL_DEFAULT_FG)
-
-    _MSG_COLORS = {"error": MSG_ERROR, "success": MSG_SUCCESS}
+            file_label.config(
+                foreground=widget_palette(is_dark_mode_var.get())["file_hint"])
 
     def set_message(msg, kind="info"):
         status_var.set(msg)
-        status_label.config(foreground=_MSG_COLORS.get(kind, ""))
+        pal = widget_palette(is_dark_mode_var.get())
+        color = {"error": pal["msg_error"], "success": pal["msg_success"]}.get(kind, "")
+        status_label.config(foreground=color)
 
     def set_enabled(enabled):
         state = tk.NORMAL if enabled else tk.DISABLED

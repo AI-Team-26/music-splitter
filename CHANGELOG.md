@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-10-16
+- Bug 15: improved dark-mode readability and button contrast. Added a per-mode widget palette in `src/theme.py` (`widget_palette()`) with tuned text, button face/bevel edges, file-hint and status-message colors. `src/ui.py` now configures the base `TButton` style (distinct raised face + visible light/shadow bevel) plus label/radio/check/group-box foregrounds via `_apply_widget_styles()`, applied both at startup and live on theme toggle. Replaced the hardcoded `gray` file hint and `red`/`green` status colors with palette values so buttons stand out from the frame surface and text keeps enough contrast in both themes (+ regression tests).
+
 ## 2026-10-15
 - Feature 22: `ttkthemes` is now a hard dependency — removed the try/catch fallback around the `ThemedStyle` import in `src/ui.py`. The module imports it at top level and always applies the themed style; the old "ttkthemes not installed" status-bar warning and the unthemed code paths are gone. Environments without the package now fail at startup with an `ImportError` instead of running unthemed.
 

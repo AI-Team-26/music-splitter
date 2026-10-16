@@ -82,12 +82,15 @@ class TestMainWindow(unittest.TestCase):
         self.set_message("Done: 3 parts created")
         self.assertIn("Done: 3 parts created", self._all_label_text())
 
-    def test_set_error_message_uses_red_foreground(self):
+    def test_set_error_message_uses_error_color(self):
         self.set_message("boom", kind="error")
         labels = self._collect(self.root, ttk.Label, [])
         error_labels = [l for l in labels if "boom" in str(l.cget("text"))]
         self.assertTrue(error_labels)
-        self.assertEqual(str(error_labels[0].cget("foreground")), "red")
+        pref = uimod._load_theme_pref()
+        dark = pref if pref is not None else uimod.is_system_theme_dark()
+        expected = uimod.widget_palette(dark)["msg_error"]
+        self.assertEqual(str(error_labels[0].cget("foreground")), expected)
 
     def test_part_length_default(self):
         self.assertEqual(self.get_part_length_m(), 10)
@@ -196,6 +199,19 @@ class TestMainWindow(unittest.TestCase):
     def test_status_bar_follows_light_theme(self):
         root = self._build_with_theme_pref(dark=False)
         self.assertEqual(self._status_bg(root), uimod.LIGHT_STATUS_BG)
+
+    @staticmethod
+    def _button_face(root):
+        return str(ttk.Style(root).lookup("TButton", "background"))
+
+    def test_button_face_differs_from_panel_in_dark(self):
+        # Bug 15: buttons must stand out from the frame surface, not blend in.
+        root = self._build_with_theme_pref(dark=True)
+        self.assertNotEqual(self._button_face(root), uimod.DARK_STATUS_BG)
+
+    def test_button_face_differs_from_panel_in_light(self):
+        root = self._build_with_theme_pref(dark=False)
+        self.assertNotEqual(self._button_face(root), uimod.LIGHT_STATUS_BG)
 
 
 if __name__ == "__main__":
