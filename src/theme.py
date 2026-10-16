@@ -47,4 +47,4 @@ def status_bg(is_dark: bool) -> str:
 
 def widget_palette(is_dark: bool) -> dict:
     """Return the per-widget color map for the given theme mode."""
-    return _PALETTES[bool(is_dark)]
+    return _PALETTES[is_dark]
