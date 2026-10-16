@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2026-10-16
+- Feature 16: the Dark Mode checkbox is replaced by an icon-only toggle button in the top-right corner — a moon while in light mode, a sun while in dark mode (both drawn programmatically with Pillow, no new asset files). Clicking swaps the theme live exactly like before; the choice still persists to `config.json` (+ regression tests).
 - Bug 15: improved dark mode.
 
 ## 2026-10-15

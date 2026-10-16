@@ -2,10 +2,6 @@
 
 ## Backlog
 
-- Feature 16 | Dark mode should not be a checkbox
-  Icon-Only Switch: Replace the checkbox with a moon/sun icon toggle button in the top-right. 
-  This saves horizontal space and looks much cleaner.
-
 - Feature 26 (low priority): Windows installer variant that **bundles FFmpeg** (follow-up of Feature 6)
   Bundle a static `ffmpeg.exe` next to the app exe so users without FFmpeg get a self-contained install.
   Resolution order: bundled copy next to exe → system PATH → error.
@@ -19,6 +15,7 @@
 
 ## Done (last 20 tasks)
 
+- Feature 16 | Dark mode toggle is now an icon-only moon/sun button in the top-right instead of a checkbox
 - Feature 17 | Main controls span full width; dark mode button right-aligned
 
 - Bug 20: window frame follows active theme

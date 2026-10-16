@@ -190,6 +190,39 @@ class TestMainWindow(unittest.TestCase):
         root = self._build_with_theme_pref(dark=False)
         self.assertEqual(self._status_bg(root), uimod.LIGHT_STATUS_BG)
 
+    @staticmethod
+    def _theme_toggle_button(root):
+        # Feature 16: the theme switch is an icon-only button (no text).
+        return next(b for b in TestMainWindow._collect(root, ttk.Button, [])
+                    if str(b.cget("text")) == "")
+
+    def test_theme_toggle_is_icon_button_not_checkbox(self):
+        root = self._build_with_theme_pref(dark=False)
+        checkboxes = self._collect(root, tk.Checkbutton, []) + \
+                     self._collect(root, ttk.Checkbutton, [])
+        self.assertEqual(checkboxes, [])
+        toggle = self._theme_toggle_button(root)
+        self.assertNotEqual(str(toggle.cget("image")), "")
+
+    def test_theme_toggle_switches_theme_and_persists(self):
+        cfg = os.path.join(tempfile.mkdtemp(), "config.json")
+        with open(cfg, "w", encoding="utf-8") as f:
+            json.dump({"dark_mode": False}, f)
+        original = uimod.CONFIG_FILE
+        uimod.CONFIG_FILE = cfg
+        self.addCleanup(setattr, uimod, "CONFIG_FILE", original)
+        root = tk.Tk()
+        root.withdraw()
+        self.addCleanup(root.destroy)
+        create_main_window(root, lambda: None, lambda: None)
+        toggle = self._theme_toggle_button(root)
+        toggle.invoke()
+        self.assertEqual(self._status_bg(root), uimod.DARK_STATUS_BG)
+        with open(cfg, encoding="utf-8") as f:
+            self.assertTrue(json.load(f)["dark_mode"])
+        toggle.invoke()  # and back to light
+        self.assertEqual(self._status_bg(root), uimod.LIGHT_STATUS_BG)
+
 
 if __name__ == "__main__":
     unittest.main()

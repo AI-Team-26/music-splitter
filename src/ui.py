@@ -119,6 +119,42 @@ def _button_image(root, path):
         return None
 
 
+def _draw_moon_icon(root):
+    """Draw a crescent-moon PhotoImage (shown while in light mode)."""
+    try:
+        from PIL import Image, ImageDraw, ImageTk
+        size = 20
+        img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        d = ImageDraw.Draw(img)
+        color = (90, 100, 115, 255)   # slate grey, readable on plastik surface
+        d.ellipse((3, 3, 17, 17), fill=color)
+        d.ellipse((8, 1, 21, 14), fill=(0, 0, 0, 0))  # bite out the crescent
+        return ImageTk.PhotoImage(img, master=root)
+    except Exception:
+        return None
+
+
+def _draw_sun_icon(root):
+    """Draw a sun PhotoImage (shown while in dark mode)."""
+    try:
+        import math
+        from PIL import Image, ImageDraw, ImageTk
+        size = 20
+        img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        d = ImageDraw.Draw(img)
+        gold = (255, 213, 79, 255)
+        cx = cy = 10
+        d.ellipse((cx - 5, cy - 5, cx + 5, cy + 5), fill=gold)
+        for angle in range(0, 360, 45):
+            rad = math.radians(angle)
+            x1, y1 = cx + 7 * math.cos(rad), cy + 7 * math.sin(rad)
+            x2, y2 = cx + 9 * math.cos(rad), cy + 9 * math.sin(rad)
+            d.line((x1, y1, x2, y2), fill=gold, width=2)
+        return ImageTk.PhotoImage(img, master=root)
+    except Exception:
+        return None
+
+
 # Flip to True if WM_NCACTIVATE alone doesn't force the frame recompute on
 # some Windows build; performs a visible 1px resize-and-back instead.
 TITLEBAR_FORCE_RESIZE_FALLBACK = False
@@ -270,8 +306,15 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     is_dark_mode_var = tk.BooleanVar(value=is_dark_mode)
 
+    # Icon-only theme toggle: moon invites switching to dark, sun back to light.
+    # Both images are kept on root so Tk never frees them mid-session.
+    theme_icons = {False: _draw_moon_icon(root), True: _draw_sun_icon(root)}
+    root._theme_icons = theme_icons
+
     def toggle_theme():
+        is_dark_mode_var.set(not is_dark_mode_var.get())
         dark = is_dark_mode_var.get()
+        theme_button.config(image=theme_icons[dark])
         style.set_theme(DARK_THEME if dark else LIGHT_THEME)
         _apply_widget_styles(style, dark)
         # Refresh the root window background to match the new theme.
@@ -283,8 +326,8 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
         set_title_bar_theme(root, dark)
         _save_theme_pref(dark)
 
-    dark_check = ttk.Checkbutton(main_frame, text="Dark Mode", variable=is_dark_mode_var, command=toggle_theme)
-    dark_check.grid(row=0, column=1, sticky=tk.E)
+    theme_button = ttk.Button(main_frame, image=theme_icons[is_dark_mode], command=toggle_theme)
+    theme_button.grid(row=0, column=1, sticky=tk.E)
     # Browse row: button + selected file name
     browse_frame = ttk.Frame(main_frame)
     browse_frame.grid(row=1, column=0, columnspan=2, sticky="we", pady=(0, pad))
