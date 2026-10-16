@@ -199,8 +199,10 @@ def _apply_widget_styles(style, is_dark):
             ("Border.border", {
                 "children": [
                     ("Button.padding", {
+                        # Only the label element: it already renders the
+                        # compound image+text; adding Button.image would draw
+                        # the icon twice.
                         "children": [
-                            ("Button.image", {"sticky": "ns"}),
                             ("Button.label", {"expand": "1", "sticky": "nswe"}),
                         ],
                         "sticky": "nswe",
