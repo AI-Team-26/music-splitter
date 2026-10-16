@@ -20,27 +20,25 @@ def create_ttk_button(parent, text, command, image=None, compound=None, style=No
     return ttk.Button(parent, **kwargs)
 
 
-_DEFAULT_ICON_SIZE = (24, 24)
+DEFAULT_ICON_PX = 24
+SMALL_ICON_PX = 16
+
+_ICON_SIZES = {"default": DEFAULT_ICON_PX, "small": SMALL_ICON_PX}
 
 
 def button_image(root, path, size="default"):
     """Load button icon via Pillow; None if unavailable or missing.
 
-    size: "default" (24x24), an int for a square, or a (width, height) tuple.
+    size: "default" (24px), "small" (16px), or an int pixel size.
     """
     try:
         from PIL import Image, ImageTk
-        if size == "default":
-            dims = _DEFAULT_ICON_SIZE
-        elif isinstance(size, int):
-            dims = (size, size)
-        else:
-            dims = tuple(size)
-        img = Image.open(path).resize(dims)
+        pixels = _ICON_SIZES[size] if isinstance(size, str) else size
+        img = Image.open(path).resize((pixels, pixels))
         return ImageTk.PhotoImage(img, master=root)
-    except Exception as err:
-        # Missing Pillow/asset must degrade gracefully (text-only button),
-        # but stay visible in the log instead of failing silently.
+    except (ImportError, OSError, ValueError, TypeError, KeyError) as err:
+        # Missing Pillow/asset/bad size must degrade gracefully (text-only
+        # button), but stay visible in the log instead of failing silently.
         log_warning("Could not load icon %s (%s); continuing without image.", path, err)
         return None
 
