@@ -206,6 +206,19 @@ def _apply_widget_styles(style, is_dark):
         lightcolor=p["btn_border"], darkcolor=p["btn_light_edge"],
         bordercolor=p["btn_border"], relief="sunken",
     )
+    # Bevel-less variant: hover/press feedback comes from color, not depth.
+    style.configure(
+        "Flat.TButton",
+        font=("Arial", 10), padding=2, borderwidth=1,
+        width="80",
+        background=p["btn_face"], foreground=p["text"],
+        relief="flat",  # no bevel at all
+    )
+    style.map(
+        "Flat.TButton",
+        background=[("pressed", p["btn_dark_edge"]),
+                    ("active", p["btn_light_edge"])],
+    )
     for name in ("TLabel", "TRadiobutton", "TCheckbutton"):
         style.configure(name, foreground=p["text"])
     style.configure("TLabelframe.Label", foreground=p["text"])
