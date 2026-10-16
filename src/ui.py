@@ -8,6 +8,7 @@ from ttkthemes import ThemedStyle
 from src import get_data_dir
 from src.logging import log_error, log_warning, read_logs
 from src.splitter import resource_path
+from src.ui_helpers import attach_tooltip, button_image, create_ttk_button
 from src.theme import (
     BIG_BUTTON_BG,
     BIG_BUTTON_DISABLED_BG,
@@ -95,71 +96,6 @@ def _save_theme_pref(dark):
             json.dump(data, f)
     except OSError as err:
         log_error("Failed to save theme preference (%s).", err)
-
-
-def _create_ttk_button(parent, text, command, image=None, compound=None, style=None, state=None):
-    """Create ttk.Button safely: only pass image when it is not None."""
-    kwargs = {"text": text, "command": command}
-    if image is not None:
-        kwargs["image"] = image
-    if compound is not None:
-        kwargs["compound"] = compound
-    if style is not None:
-        kwargs["style"] = style
-    if state is not None:
-        kwargs["state"] = state
-    return ttk.Button(parent, **kwargs)
-
-
-def _button_image(root, path):
-    """Load button icon via Pillow; None if unavailable or missing."""
-    try:
-        from PIL import Image, ImageTk
-        img = Image.open(path).resize((24, 24))
-        return ImageTk.PhotoImage(img, master=root)
-    except Exception:
-        return None
-
-
-def _attach_tooltip(widget, text, delay_ms=500):
-    """Attach a basic hover tooltip (Tkinter has none natively)."""
-    tip = None
-    timer = None
-
-    def show():
-        nonlocal tip, timer
-        timer = None
-        if tip is not None:
-            return
-        x = widget.winfo_rootx() + 20
-        y = widget.winfo_rooty() + widget.winfo_height() + 4
-        # Master the main window (not the widget) so the tooltip stays a direct
-        # child of it and is destroyed together with the app.
-        tip = tk.Toplevel(widget.winfo_toplevel())
-        tip.wm_overrideredirect(True)
-        tip.wm_geometry(f"+{x}+{y}")
-        lbl = tk.Label(tip, text=text, background="#ffffe0", foreground="#1e1e1e",
-                       relief=tk.SOLID, borderwidth=1, font=("Arial", 9))
-        lbl.pack()
-
-    def on_enter(_event):
-        nonlocal timer
-        if timer is not None:
-            widget.after_cancel(timer)
-        timer = widget.after(delay_ms, show)
-
-    def on_leave(_event):
-        nonlocal tip, timer
-        if timer is not None:
-            widget.after_cancel(timer)
-            timer = None
-        if tip is not None:
-            tip.destroy()
-            tip = None
-
-    widget.bind("<Enter>", on_enter)
-    widget.bind("<Leave>", on_leave)
-
 
 
 # Flip to True if WM_NCACTIVATE alone doesn't force the frame recompute on
@@ -262,6 +198,14 @@ def _apply_widget_styles(style, is_dark):
         lightcolor=p["btn_light_edge"], darkcolor=p["btn_dark_edge"],
         bordercolor=p["btn_border"], relief="raised",
     )
+    # Inverted bevel: reads as pressed/selected for the active theme button.
+    style.configure(
+        "ThemeActive.TButton",
+        font=("Arial", 10), padding=8, borderwidth=2,
+        background=p["btn_dark_edge"], foreground=p["text"],
+        lightcolor=p["btn_border"], darkcolor=p["btn_light_edge"],
+        bordercolor=p["btn_border"], relief="sunken",
+    )
     for name in ("TLabel", "TRadiobutton", "TCheckbutton"):
         style.configure(name, foreground=p["text"])
     style.configure("TLabelframe.Label", foreground=p["text"])
@@ -313,17 +257,22 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     is_dark_mode_var = tk.BooleanVar(value=is_dark_mode)
 
-    # Icon-only theme toggle: moon invites switching to dark, sun back to light.
-    # Both images are kept on root so Tk never frees them mid-session.
-    theme_icons = {False: _button_image(root, MOON_ICON), True: _button_image(root, SUN_ICON)}
-    root._theme_icons = theme_icons
+    # Light/Dark switch: two joined buttons; the one matching the current
+    # theme is rendered in its pressed (ThemeActive) state.
+    sun_img = button_image(root, SUN_ICON)
+    moon_img = button_image(root, MOON_ICON)
+    if sun_img is not None or moon_img is not None:
+        root._theme_imgs = (sun_img, moon_img)  # keep refs so Tk doesn't free them
 
-    def toggle_theme():
-        is_dark_mode_var.set(not is_dark_mode_var.get())
-        dark = is_dark_mode_var.get()
-        theme_button.config(image=theme_icons[dark])
+    def select_theme(dark):
+        if is_dark_mode_var.get() == dark:
+            return
+        is_dark_mode_var.set(dark)
         style.set_theme(DARK_THEME if dark else LIGHT_THEME)
         _apply_widget_styles(style, dark)
+        # Re-assert the pressed look after the base theme swap re-applies styles.
+        light_button.config(style="TButton" if dark else "ThemeActive.TButton")
+        dark_button.config(style="ThemeActive.TButton" if dark else "TButton")
         # Refresh the root window background to match the new theme.
         root.config(background=DARK_STATUS_BG if dark else LIGHT_STATUS_BG)
         style.configure("Status.TFrame",
@@ -333,18 +282,29 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
         set_title_bar_theme(root, dark)
         _save_theme_pref(dark)
 
-    theme_button = ttk.Button(main_frame, image=theme_icons[is_dark_mode], command=toggle_theme)
-    theme_button.grid(row=0, column=1, sticky=tk.E)
-    _attach_tooltip(theme_button, "Toggle dark mode")
+    theme_switch = ttk.Frame(main_frame)
+    theme_switch.grid(row=0, column=1, sticky=tk.E)
+    light_button = create_ttk_button(
+        theme_switch, text="Light", command=lambda: select_theme(False),
+        image=sun_img, compound=tk.LEFT,
+        style="ThemeActive.TButton" if not is_dark_mode else "TButton")
+    light_button.pack(side=tk.LEFT)
+    dark_button = create_ttk_button(
+        theme_switch, text="Dark", command=lambda: select_theme(True),
+        image=moon_img, compound=tk.LEFT,
+        style="ThemeActive.TButton" if is_dark_mode else "TButton")
+    dark_button.pack(side=tk.LEFT)
+    attach_tooltip(light_button, "Switch to light mode")
+    attach_tooltip(dark_button, "Switch to dark mode")
     # Browse row: button + selected file name
     browse_frame = ttk.Frame(main_frame)
     browse_frame.grid(row=1, column=0, columnspan=2, sticky="we", pady=(0, pad))
 
-    browse_img = _button_image(root, BROWSE_ICON)
+    browse_img = button_image(root, BROWSE_ICON)
     if browse_img is not None:
         root._browse_img = browse_img  # keep a reference so Tk doesn't free it
-    browse_button = _create_ttk_button(browse_frame, text="Browse...", command=browse_file,
-                                        image=browse_img, compound=tk.LEFT)
+    browse_button = create_ttk_button(browse_frame, text="Browse...", command=browse_file,
+                                       image=browse_img, compound=tk.LEFT)
     browse_button.pack(side=tk.LEFT)
 
     file_var = tk.StringVar(value="No file selected")
@@ -378,10 +338,10 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
         ).pack(side=tk.LEFT, padx=(0, pad_xl))
 
     # Big SPLIT button, disabled until a source file is selected
-    split_img = _button_image(root, SPLIT_ICON)
+    split_img = button_image(root, SPLIT_ICON)
     if split_img is not None:
         root._split_img = split_img
-    split_button = _create_ttk_button(main_frame, text="SPLIT", command=split_file,
+    split_button = create_ttk_button(main_frame, text="SPLIT", command=split_file,
                                        image=split_img, compound=tk.LEFT,
                                        style="Big.TButton", state=tk.DISABLED)
     split_button.grid(row=4, column=0, columnspan=2, sticky="we", pady=(pad, 0))

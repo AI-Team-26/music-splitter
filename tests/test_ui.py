@@ -191,11 +191,11 @@ class TestMainWindow(unittest.TestCase):
         root = self._build_with_theme_pref(dark=False)
         self.assertEqual(self._status_bg(root), uimod.LIGHT_STATUS_BG)
 
-    def test_theme_toggle_shows_tooltip_on_hover(self):
+    def test_theme_switch_shows_tooltip_on_hover(self):
         import tkinter as tk_mod
         root = self._build_with_theme_pref(dark=False)
-        toggle = self._theme_toggle_button(root)
-        toggle.event_generate("<Enter>")
+        dark_btn = self._theme_button(root, "Dark")
+        dark_btn.event_generate("<Enter>")
         deadline = time.time() + 2
         while time.time() < deadline:
             root.update()
@@ -205,26 +205,30 @@ class TestMainWindow(unittest.TestCase):
         tooltips = [w for w in root.winfo_children() if isinstance(w, tk.Toplevel)]
         self.assertEqual(len(tooltips), 1)
         texts = self._collect(tooltips[0], tk.Label, [])
-        self.assertTrue(any(str(l.cget("text")) == "Toggle dark mode" for l in texts))
-        toggle.event_generate("<Leave>")
+        self.assertTrue(any(str(l.cget("text")) == "Switch to dark mode" for l in texts))
+        dark_btn.event_generate("<Leave>")
         root.update_idletasks()
         self.assertFalse([w for w in root.winfo_children() if isinstance(w, tk.Toplevel)])
 
     @staticmethod
-    def _theme_toggle_button(root):
-        # Feature 16: the theme switch is an icon-only button (no text).
+    def _theme_button(root, text):
         return next(b for b in TestMainWindow._collect(root, ttk.Button, [])
-                    if str(b.cget("text")) == "")
+                    if str(b.cget("text")) == text)
 
-    def test_theme_toggle_is_icon_button_not_checkbox(self):
+    def test_theme_switch_is_light_dark_buttons_not_checkbox(self):
         root = self._build_with_theme_pref(dark=False)
         checkboxes = self._collect(root, tk.Checkbutton, []) + \
                      self._collect(root, ttk.Checkbutton, [])
         self.assertEqual(checkboxes, [])
-        toggle = self._theme_toggle_button(root)
-        self.assertNotEqual(str(toggle.cget("image")), "")
+        light = self._theme_button(root, "Light")
+        dark = self._theme_button(root, "Dark")
+        self.assertNotEqual(str(light.cget("image")), "")
+        self.assertNotEqual(str(dark.cget("image")), "")
+        # The button matching the current theme is rendered pressed.
+        self.assertEqual(str(light.cget("style")), "ThemeActive.TButton")
+        self.assertEqual(str(dark.cget("style")), "TButton")
 
-    def test_theme_toggle_switches_theme_and_persists(self):
+    def test_theme_switch_selects_theme_and_persists(self):
         cfg = os.path.join(tempfile.mkdtemp(), "config.json")
         with open(cfg, "w", encoding="utf-8") as f:
             json.dump({"dark_mode": False}, f)
@@ -235,12 +239,15 @@ class TestMainWindow(unittest.TestCase):
         root.withdraw()
         self.addCleanup(root.destroy)
         create_main_window(root, lambda: None, lambda: None)
-        toggle = self._theme_toggle_button(root)
-        toggle.invoke()
+        dark_btn = self._theme_button(root, "Dark")
+        light_btn = self._theme_button(root, "Light")
+        dark_btn.invoke()
         self.assertEqual(self._status_bg(root), uimod.DARK_STATUS_BG)
+        self.assertEqual(str(dark_btn.cget("style")), "ThemeActive.TButton")
+        self.assertEqual(str(light_btn.cget("style")), "TButton")
         with open(cfg, encoding="utf-8") as f:
             self.assertTrue(json.load(f)["dark_mode"])
-        toggle.invoke()  # and back to light
+        light_btn.invoke()  # and back to light
         self.assertEqual(self._status_bg(root), uimod.LIGHT_STATUS_BG)
 
 
