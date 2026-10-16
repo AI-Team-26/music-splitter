@@ -187,13 +187,32 @@ def set_title_bar_theme(root, dark):
 def _apply_widget_styles(style, is_dark):
     """Apply per-mode colors so buttons read as raised and text keeps contrast.
 
-    The base ttk themes are flat by default, leaving button faces close to the
-    frame surface with a barely visible bevel; explicit face + edge colors fix it.
+    plastik/equilux draw TButton with their own image-based `Button.button`
+    element that ignores relief/bevel options, so we swap in the classic
+    Border/label elements which honor -background/-lightcolor/-darkcolor and
+    render a real raised bevel.
     """
     p = widget_palette(is_dark)
+    style.layout(
+        "TButton",
+        [
+            ("Border.border", {
+                "children": [
+                    ("Button.padding", {
+                        "children": [
+                            ("Button.image", {"sticky": "ns"}),
+                            ("Button.label", {"expand": "1", "sticky": "nswe"}),
+                        ],
+                        "sticky": "nswe",
+                    }),
+                ],
+                "sticky": "nswe",
+            })
+        ],
+    )
     style.configure(
         "TButton",
-        font=("Arial", 10), padding=8,
+        font=("Arial", 10), padding=8, borderwidth=2,
         background=p["btn_face"], foreground=p["text"],
         lightcolor=p["btn_light_edge"], darkcolor=p["btn_dark_edge"],
         bordercolor=p["btn_border"], relief="raised",
