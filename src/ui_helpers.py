@@ -20,18 +20,19 @@ def create_ttk_button(parent, text, command, image=None, compound=None, style=No
     return ttk.Button(parent, **kwargs)
 
 
-_DEFAULT_ICON_SIZE = (24, 24)
+_ICON_SIZES = {"default": (24, 24), "small": (16, 16)}
 
 
 def button_image(root, path, size="default"):
     """Load button icon via Pillow; None if unavailable or missing.
 
-    size: "default" (24x24), an int for a square, or a (width, height) tuple.
+    size: "default" (24x24), "small" (16x16), an int for a square,
+    or a (width, height) tuple.
     """
     try:
         from PIL import Image, ImageTk
-        if size == "default":
-            dims = _DEFAULT_ICON_SIZE
+        if isinstance(size, str):
+            dims = _ICON_SIZES[size]
         elif isinstance(size, int):
             dims = (size, size)
         else:
