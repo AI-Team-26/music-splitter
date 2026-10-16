@@ -1,6 +1,7 @@
 import json
 import os
 import tempfile
+import time
 import unittest
 import tkinter as tk
 from tkinter import ttk
@@ -189,6 +190,25 @@ class TestMainWindow(unittest.TestCase):
     def test_status_bar_follows_light_theme(self):
         root = self._build_with_theme_pref(dark=False)
         self.assertEqual(self._status_bg(root), uimod.LIGHT_STATUS_BG)
+
+    def test_theme_toggle_shows_tooltip_on_hover(self):
+        import tkinter as tk_mod
+        root = self._build_with_theme_pref(dark=False)
+        toggle = self._theme_toggle_button(root)
+        toggle.event_generate("<Enter>")
+        deadline = time.time() + 2
+        while time.time() < deadline:
+            root.update()
+            time.sleep(0.05)
+            if any(isinstance(w, tk.Toplevel) for w in root.winfo_children()):
+                break
+        tooltips = [w for w in root.winfo_children() if isinstance(w, tk.Toplevel)]
+        self.assertEqual(len(tooltips), 1)
+        texts = self._collect(tooltips[0], tk.Label, [])
+        self.assertTrue(any(str(l.cget("text")) == "Toggle dark mode" for l in texts))
+        toggle.event_generate("<Leave>")
+        root.update_idletasks()
+        self.assertFalse([w for w in root.winfo_children() if isinstance(w, tk.Toplevel)])
 
     @staticmethod
     def _theme_toggle_button(root):

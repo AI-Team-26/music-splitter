@@ -121,6 +121,46 @@ def _button_image(root, path):
         return None
 
 
+def _attach_tooltip(widget, text, delay_ms=500):
+    """Attach a basic hover tooltip (Tkinter has none natively)."""
+    tip = None
+    timer = None
+
+    def show():
+        nonlocal tip, timer
+        timer = None
+        if tip is not None:
+            return
+        x = widget.winfo_rootx() + 20
+        y = widget.winfo_rooty() + widget.winfo_height() + 4
+        # Master the main window (not the widget) so the tooltip stays a direct
+        # child of it and is destroyed together with the app.
+        tip = tk.Toplevel(widget.winfo_toplevel())
+        tip.wm_overrideredirect(True)
+        tip.wm_geometry(f"+{x}+{y}")
+        lbl = tk.Label(tip, text=text, background="#ffffe0", foreground="#1e1e1e",
+                       relief=tk.SOLID, borderwidth=1, font=("Arial", 9))
+        lbl.pack()
+
+    def on_enter(_event):
+        nonlocal timer
+        if timer is not None:
+            widget.after_cancel(timer)
+        timer = widget.after(delay_ms, show)
+
+    def on_leave(_event):
+        nonlocal tip, timer
+        if timer is not None:
+            widget.after_cancel(timer)
+            timer = None
+        if tip is not None:
+            tip.destroy()
+            tip = None
+
+    widget.bind("<Enter>", on_enter)
+    widget.bind("<Leave>", on_leave)
+
+
 
 # Flip to True if WM_NCACTIVATE alone doesn't force the frame recompute on
 # some Windows build; performs a visible 1px resize-and-back instead.
@@ -295,6 +335,7 @@ def create_main_window(root, browse_file, split_file, filename_format="numbers",
 
     theme_button = ttk.Button(main_frame, image=theme_icons[is_dark_mode], command=toggle_theme)
     theme_button.grid(row=0, column=1, sticky=tk.E)
+    _attach_tooltip(theme_button, "Toggle dark mode")
     # Browse row: button + selected file name
     browse_frame = ttk.Frame(main_frame)
     browse_frame.grid(row=1, column=0, columnspan=2, sticky="we", pady=(0, pad))
