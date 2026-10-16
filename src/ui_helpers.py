@@ -20,7 +20,13 @@ def create_ttk_button(parent, text, command, image=None, compound=None, style=No
     return ttk.Button(parent, **kwargs)
 
 
-_ICON_SIZES = {"default": (24, 24), "small": (16, 16)}
+DEFAULT_ICON_PX = 24
+SMALL_ICON_PX = 16
+
+_ICON_SIZES = {
+    "default": (DEFAULT_ICON_PX, DEFAULT_ICON_PX),
+    "small": (SMALL_ICON_PX, SMALL_ICON_PX),
+}
 
 
 def button_image(root, path, size="default"):
