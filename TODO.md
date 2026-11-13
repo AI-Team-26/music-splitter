@@ -19,7 +19,7 @@
 
 - Feature 29 | Add Italian an Spanish localization (can be sugegsted/picked by user OS?)
 
-## Done (last 20 tasks)
+## Done (latest ones)
 
 - Feature 16 | Dark mode toggle is now an icon-only moon/sun button in the top-right instead of a checkbox
 - Feature 17 | Main controls span full width; dark mode button right-aligned
