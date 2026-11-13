@@ -13,6 +13,10 @@
   Are all the information updated ?
   Add a link to the (latest) Release
 
+- Feature 27 | "Split" option available on the .mp3 files in Windows context menu to open the program with that file selected.
+
+- Feature 28 | Extend it to accept .flac files (and create .mp3 parts)
+
 ## Done (last 20 tasks)
 
 - Feature 16 | Dark mode toggle is now an icon-only moon/sun button in the top-right instead of a checkbox
