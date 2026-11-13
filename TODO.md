@@ -17,6 +17,8 @@
 
 - Feature 28 | Extend it to accept .flac files (and create .mp3 parts)
 
+- Feature 29 | Add Italian an Spanish localization (can be sugegsted/picked by user OS?)
+
 ## Done (last 20 tasks)
 
 - Feature 16 | Dark mode toggle is now an icon-only moon/sun button in the top-right instead of a checkbox
